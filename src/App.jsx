@@ -1,3 +1,4 @@
+import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
 import React, { useState, useReducer, useMemo } from "react";
 import {
   Search, MapPin, Calendar, Clock, Users, Trophy, User, Home,
@@ -246,10 +247,10 @@ const NAV_ITEMS = [
   { key: "clubs", label: "Clubs", icon: Building2 },
   { key: "rankings", label: "Rankings", icon: TrendingUp },
   { key: "tournaments", label: "Tournaments", icon: Trophy },
-  { key: "bookings", label: "My bookings", icon: Calendar },
+  { key: "bookings", label: "Bookings", icon: Calendar },
   { key: "organiser", label: "Organiser", icon: ClipboardList },
 ];
-const MOBILE_NAV = ["discover", "clubs", "tournaments", "bookings", "rankings"];
+const MOBILE_NAV = ["discover", "clubs", "create", "rankings", "bookings"];
 
 const NOTIFICATIONS = [
   { id: "n1", title: "Waitlist spot opened", detail: "A seat freed up in Bromley Fast Rotation.", time: "12m ago" },
@@ -301,6 +302,8 @@ function Tabs({ options, value, onChange }) {
 
 function AccountMenu({ open, setOpen, go, openAccountModal }) {
   const items = [
+    { label: "Coaching", action: () => go("coaching") },
+    { label: "Tournaments", action: () => go("tournaments") },
     { label: "View profile", action: () => go("profile") },
     { label: "Organiser portal", action: () => go("organiser") },
     { label: "Settings", action: () => openAccountModal("settings") },
@@ -512,6 +515,7 @@ function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen
             </button>
           ))}
         </nav>
+        <button aria-label="Create" onClick={() => go("create")} className="art-plus desktop-plus">+</button>
         <NotificationBell open={notifOpen} setOpen={setNotifOpen} />
         <AccountMenu open={accountOpen} setOpen={setAccountOpen} go={go} openAccountModal={openAccountModal} />
       </div>
@@ -536,13 +540,14 @@ function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAcco
 function BottomNav({ view, go }) {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-20 grid grid-cols-5 border-t border-stone-800 bg-stone-900">
-      {NAV_ITEMS.filter((i) => MOBILE_NAV.includes(i.key)).map((item) => {
+      {MOBILE_NAV.map(key => key === "create" ? { key, label: "Create", icon: Plus } : NAV_ITEMS.find(i => i.key === key)).map((item) => {
         const Icon = item.icon;
         const active = view === item.key;
         return (
-          <button key={item.key} onClick={() => go(item.key)} className="flex flex-col items-center gap-0.5 py-2.5">
+          <button key={item.key} aria-label={item.key === "create" ? "Create" : item.label} onClick={() => go(item.key)} className="flex flex-col items-center justify-center gap-0.5 py-2.5">
+            {item.key === "create" ? <span className="art-plus">+</span> : <>
             <Icon className={`h-5 w-5 ${active ? "text-yellow-400" : "text-stone-500"}`} />
-            <span className={`text-xs ${active ? "text-white font-medium" : "text-stone-500"}`}>{item.label.split(" ")[0]}</span>
+            <span className={`text-xs ${active ? "text-white font-medium" : "text-stone-500"}`}>{item.label}</span></>}
           </button>
         );
       })}
@@ -1354,6 +1359,7 @@ function OrganiserPage() {
 ---------------------------------------------------------------- */
 export default function FlashX() {
   const [view, setView] = useState("discover");
+  const [createOpen, setCreateOpen] = useState(false);
   const [params, setParams] = useState({});
   const [bookings, setBookings] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -1365,7 +1371,7 @@ export default function FlashX() {
   const [accountModal, setAccountModal] = useState({ open: false, tab: "settings" });
   const [toast, setToast] = useState(null);
 
-  const go = (v, p = {}) => { setView(v); setParams(p); setNotifOpen(false); setAccountOpen(false); window.scrollTo(0, 0); };
+  const go = (v, p = {}) => { if(v === "create") { setCreateOpen(true); return; } setView(v); setParams(p); setNotifOpen(false); setAccountOpen(false); window.scrollTo(0, 0); };
   const book = (id) => setBookings((b) => (b.some((x) => x.id === id) ? b : [...b, { id }]));
   const cancel = (id) => setBookings((b) => b.filter((x) => x.id !== id));
   const toggleFav = (id) => setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
@@ -1423,6 +1429,11 @@ export default function FlashX() {
       {view === "tournaments" && <TournamentsPage openTournament={(id) => go("tournamentDetail", { tournamentId: id })} registeredTournaments={registeredTournaments} />}
       {view === "tournamentDetail" && <TournamentDetailPage tournamentId={params.tournamentId} go={go} registeredTournaments={registeredTournaments} toggleRegister={toggleRegister} />}
       {view === "organiser" && <OrganiserPage />}
+      {view === "create-session" && <EventForm key="session" onBack={() => go("discover")} />}
+      {view === "create-tournament" && <EventForm key="tournament" kind="tournament" onBack={() => go("discover")} />}
+      {view === "create-club" && <ClubForm onBack={() => go("clubs")} />}
+      {view === "coaching" && <CoachingFlow onBack={() => go("discover")} />}
+      {createOpen && <CreateSheet onClose={() => setCreateOpen(false)} onChoose={kind => { setCreateOpen(false); go(kind === "coaching" ? "coaching" : `create-${kind}`); }} />}
 
       <AccountModal
         open={accountModal.open}
