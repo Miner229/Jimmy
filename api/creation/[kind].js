@@ -1,13 +1,25 @@
-// The existing site has no authenticated backend. Fail explicitly until real
-// identity, durable storage, private certificate uploads and review are wired.
-export default function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
-  if (!['GET', 'POST'].includes(req.method)) {
-    res.setHeader('Allow', 'GET, POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+import platform from "../platform/[action].js";
+// Preserve legacy URLs, reusing the same canonical Club/Session service.
+export default async function handler(req, res) {
+  const actions = {
+    club: "clubs",
+    session: "sessions",
+    tournament: "sessions",
+  };
+  if (actions[req.query?.kind]) {
+    if (!req.headers["content-type"]?.includes("application/json"))
+      return res
+        .status(415)
+        .json({ error: "Use the current Club or Session form." });
+    req.query.action = actions[req.query.kind];
+    return platform(req, res);
   }
-  return res.status(503).json({
-    error: 'The publishing and registration service is not connected yet. Nothing has been submitted. Your information is still in this form; please keep this page open.',
-    code: 'SERVICE_NOT_CONFIGURED',
-  });
+  res.setHeader("Cache-Control", "no-store");
+  return res
+    .status(503)
+    .json({
+      error:
+        "Coach application review is not configured yet. Nothing has been submitted.",
+      code: "SERVICE_NOT_CONFIGURED",
+    });
 }
