@@ -621,13 +621,13 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
 
   return (
     <div>
-      <section className="relative h-44 overflow-hidden bg-stone-900 sm:h-48">
+      <section className="relative min-h-44 overflow-hidden bg-stone-900 sm:min-h-48">
         <div className="absolute inset-0 z-0">
           <Photo id={PHOTOS.hero} alt="Players on an indoor badminton court" className="h-full w-full" overlay={false} />
         </div>
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-stone-900 via-stone-900/75 to-stone-900/20" />
-        <div className="relative z-10 flex h-full max-w-lg flex-col justify-center px-4 sm:px-8">
-          <p className="mt-2 text-sm text-stone-300">JimmiPlay is where London's badminton players find each other — book a session by level and location, follow your club, and track your ranking, all in one place.</p>
+        <div className="relative z-10 flex min-h-44 max-w-lg flex-col justify-center px-4 py-6 sm:min-h-48 sm:px-8">
+          <p className="mt-2 text-sm text-stone-300">Helps badminton players find each other — book a session by level and location, follow your club, track your ranking, find a coach and buy shuttles and more, all in one place.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="accent" onClick={() => document.getElementById("session-list")?.scrollIntoView({ behavior: "smooth" })}>
               <Search className="h-4 w-4" /> Find a session
