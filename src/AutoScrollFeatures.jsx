@@ -7,7 +7,11 @@ export default function AutoScrollFeatures({children}) {
   useEffect(()=>{
     const el=strip.current;
     const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-    let frame, last=0, direction=1, hovering=false, focused=false, touching=false, resumeAt=performance.now()+1000;
+    let frame, last=0, hovering=false, focused=false, touching=false, resumeAt=performance.now()+1000;
+    const group=el.querySelector('.feature-loop-group');
+    const reset=()=>{el.scrollLeft=group.getBoundingClientRect().width;};
+    reset();
+    const resize=new ResizeObserver(reset);resize.observe(el);
     const enter=e=>{if(e.pointerType==='mouse')hovering=true;};
     const leave=()=>{hovering=false;};
     const down=()=>{touching=true;};
@@ -17,10 +21,11 @@ export default function AutoScrollFeatures({children}) {
     const wheel=()=>{resumeAt=performance.now()+2500;};
     const tick=now=>{
       const elapsed=last?Math.min(now-last,50):0;last=now;
-      const max=el.scrollWidth-el.clientWidth;
-      if(!paused&&!reduced.matches&&!document.hidden&&!hovering&&!focused&&!touching&&now>resumeAt&&max>1){
-        el.scrollLeft=Math.max(0,Math.min(max,el.scrollLeft+direction*elapsed*.03));
-        if((direction>0&&el.scrollLeft>=max-1)||(direction<0&&el.scrollLeft<=1)){direction*=-1;resumeAt=now+1200;}
+      const width=group.getBoundingClientRect().width;
+      if(!paused&&!reduced.matches&&!document.hidden&&!hovering&&!focused&&!touching&&now>resumeAt&&width>0){
+        // Decreasing scrollLeft moves the icons visually from left to right.
+        const next=el.scrollLeft-elapsed*.03;
+        el.scrollLeft=next<=0?next+width:next;
       }
       frame=requestAnimationFrame(tick);
     };
@@ -28,7 +33,7 @@ export default function AutoScrollFeatures({children}) {
     el.addEventListener('pointerdown',down);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
     el.addEventListener('focusin',focus);el.addEventListener('focusout',blur);el.addEventListener('wheel',wheel,{passive:true});
     frame=requestAnimationFrame(tick);
-    return ()=>{cancelAnimationFrame(frame);el.removeEventListener('pointerenter',enter);el.removeEventListener('pointerleave',leave);el.removeEventListener('pointerdown',down);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);el.removeEventListener('focusin',focus);el.removeEventListener('focusout',blur);el.removeEventListener('wheel',wheel);};
+    return ()=>{resize.disconnect();cancelAnimationFrame(frame);el.removeEventListener('pointerenter',enter);el.removeEventListener('pointerleave',leave);el.removeEventListener('pointerdown',down);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);el.removeEventListener('focusin',focus);el.removeEventListener('focusout',blur);el.removeEventListener('wheel',wheel);};
   },[paused]);
-  return <div className="feature-autoscroll"><div ref={strip} className="jimmi-feature-strip">{children}</div><button className="feature-scroll-toggle" aria-label={paused?'Resume automatic scrolling':'Pause automatic scrolling'} aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?<Play size={12}/>:<Pause size={12}/>}</button></div>;
+  return <div className="feature-autoscroll"><div ref={strip} className="jimmi-feature-strip feature-loop-strip">{[0,1,2].map(copy=><div key={copy} className="feature-loop-group" aria-hidden={copy!==1?true:undefined}>{React.Children.map(children,child=>React.isValidElement(child)&&copy!==1?React.cloneElement(child,{tabIndex:-1}):child)}</div>)}</div><button className="feature-scroll-toggle" aria-label={paused?'Resume automatic scrolling':'Pause automatic scrolling'} aria-pressed={paused} onClick={()=>setPaused(v=>!v)}>{paused?<Play size={12}/>:<Pause size={12}/>}</button></div>;
 }
