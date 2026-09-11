@@ -1,4 +1,4 @@
-export const defaultFilters = { date: 'any', type: 'any', level: 'any', sort: 'smart', radius: 'any', start: '', end: '', free: false, query: '' };
+export const defaultFilters = { area: null, date: 'any', type: 'any', level: 'any', sort: 'smart', radius: 'any', start: '', end: '', free: false, query: '' };
 export function distanceKm(a, b) {
   if (!a || !b) return null;
   const rad = n => n * Math.PI / 180;
@@ -8,6 +8,7 @@ export function distanceKm(a, b) {
 export function filterSessions(sessions, f, position) {
   return sessions.map(s => ({...s, distanceKm: distanceKm(position, s.coordinates)})).filter(s => {
     if (f.query && !`${s.name} ${s.club} ${s.location}`.toLowerCase().includes(f.query.toLowerCase().trim())) return false;
+    if (f.area && (s.areaId !== f.area.areaId || (f.area.cityId && !s.cityIds?.includes(f.area.cityId)))) return false;
     if (f.date !== 'any' && s.dateISO !== f.date) return false;
     if (f.type !== 'any' && s.type !== f.type) return false;
     if (f.level !== 'any') { const [lo,hi] = f.level.split('-').map(Number); if(s.levelMax<lo || s.levelMin>hi) return false; }

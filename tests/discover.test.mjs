@@ -17,3 +17,21 @@ test('Distance uses coordinates and never a fabricated fallback',()=>{
 test('Sort orders are deterministic and do not mutate data',()=>{
  assert.deepEqual(ids({sort:'smart'}),[2,1]);assert.deepEqual(ids({sort:'time'}),[1,2]);assert.deepEqual(ids({sort:'distance'}),[1,2]);assert.equal(sessions[0].distanceKm,undefined);
 });
+test('County and city selection uses IDs and excludes untagged sessions',()=>{
+ const local=[{...sessions[0],areaId:'GB.ENG.GLA',cityIds:['london','crystal-palace']},{...sessions[1],areaId:'GB.SCT.U8',cityIds:['edinburgh']}, {...sessions[0],id:3}];
+ const select=area=>filterSessions(local,{...defaultFilters,area},null).map(s=>s.id);
+ assert.deepEqual(select({areaId:'GB.ENG.GLA'}),[1]);
+ assert.deepEqual(select({areaId:'GB.ENG.GLA',cityId:'london'}),[1]);
+ assert.deepEqual(select({areaId:'GB.ENG.GLA',cityId:'crystal-palace'}),[1]);
+ assert.deepEqual(select({areaId:'GB.ENG.GLA',cityId:'edinburgh'}),[]);
+ assert.equal(select(null).length,3);
+});
+test('UK dataset covers four nations and has stable unique place IDs',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const {areas}=JSON.parse(await readFile(new URL('../public/data/uk-places.json',import.meta.url),'utf8'));
+ for(const nation of ['England','Scotland','Wales','Northern Ireland'])assert.ok(areas.some(a=>a.country===nation&&a.places.length));
+ const places=areas.flatMap(a=>a.places);
+ for(const name of ['London','Belfast','Cardiff','Edinburgh','Wrexham','Milton Keynes','Dunfermline','Bangor'])assert.ok(places.some(p=>p.name===name),name);
+ assert.equal(new Set(places.map(p=>p.id)).size,places.length);
+ assert.ok(areas.some(a=>a.id==='GB.ENG.GLA'&&a.places.some(p=>p.id==='2643743')));
+});

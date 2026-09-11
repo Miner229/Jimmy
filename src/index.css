@@ -46,3 +46,19 @@
 .discover-calendar[data-selected=true] { background: #fef9c3; color: #713f12; }
 .discover-selected-date { padding: 0 16px 8px; font-size: 12px; color: #854d0e; }
 .discover-dates button { flex-basis: 36px; }
+.area-modes > button { font-weight: 600; display: flex; justify-content: space-between; border-bottom: 1px solid #e7e5e4; border-radius: 0; }
+.area-modes > button[aria-expanded=true] { color: #854d0e; }
+.city-search input { width: 100%; background: #f5f5f4; border-radius: 10px; padding: 10px; margin-top: 10px; }
+.city-matrix { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); border-top: 1px solid #e7e5e4; border-bottom: 1px solid #e7e5e4; }
+.city-matrix h3 { font-size: 12px; color: #78716c; padding: 8px 4px; }
+.county-column { border-right: 1px solid #e7e5e4; }
+.county-scroll, .cities-scroll { height: 220px; overflow-y: auto; overscroll-behavior: contain; }
+.city-matrix button { padding: 9px 6px; text-align: left; font-size: 12px; border-radius: 6px; overflow-wrap: anywhere; }
+.county-scroll button { width: 100%; }
+.country-label { font-size: 11px; color: #78716c; padding: 8px 5px; }
+.city-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; padding: 4px; }
+.city-grid button { border: 1px solid #e7e5e4; }
+.county-all { margin-left: 4px; }
+.city-source { font-size: 10px; color: #78716c; padding: 8px 4px; }
+.city-source a { text-decoration: underline; }
+.discover-filterbar button { min-width: 0; overflow-wrap: anywhere; }
