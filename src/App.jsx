@@ -1,3 +1,4 @@
+import { api, auth, usePlatform, AuthPanel, VerifiedGate, ClubDashboard, InvitationPage } from './Platform';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
 import React, { useState, useReducer, useMemo } from "react";
 import {
@@ -51,7 +52,7 @@ const LEVELS = [
   { n: 9, name: "Performance", detail: "County, university first-team or semi-professional standard." },
 ];
 
-const SESSIONS = [
+const DEMO_SESSIONS = [
   { id: "game-1", name: "Tuesday Improver Doubles", type: "Doubles", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Tue 2 Sep", timeStart: "19:00", timeEnd: "21:00", price: 8, seats: 16, going: 9, male: 5, female: 4, levelMin: 2, levelMax: 4, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 88, refundBy: "2 Sep, 02:00", tags: ["Level matched", "Shuttles included"] },
   { id: "game-2", name: "Bromley Fast Rotation", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Thu 4 Sep", timeStart: "20:00", timeEnd: "22:00", price: 9, seats: 16, going: 16, male: 10, female: 6, levelMin: 4, levelMax: 6, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 91, refundBy: "3 Sep, 20:00", tags: ["Waitlist refill", "Fast rotation"] },
   { id: "game-3", name: "Sunday Social Courts", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Sun 6 Sep", timeStart: "10:00", timeEnd: "12:00", price: 7, seats: 16, going: 11, male: 8, female: 3, levelMin: 1, levelMax: 3, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 84, refundBy: "5 Sep, 10:00", tags: ["Beginner friendly", "Racket support"] },
@@ -75,6 +76,7 @@ const ROSTER_POOL = [
   { name: "Owen Bell", level: 5, gender: "M" }, { name: "Nadia Farouk", level: 2, gender: "F" },
 ];
 function rosterFor(session) {
+  if(session.live) return [];
   const offset = session.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % ROSTER_POOL.length;
   return Array.from({ length: session.going }, (_, i) => ROSTER_POOL[(offset + i) % ROSTER_POOL.length]);
 }
@@ -84,13 +86,19 @@ function rosterFor(session) {
 const VENUE_ADDRESS = "Crystal Palace, National Sports Centre, Ledrington Rd, London SE19 2BB";
 const VENUE_MAP_EMBED = `https://www.google.com/maps?q=${encodeURIComponent(VENUE_ADDRESS)}&output=embed`;
 
-const CLUBS = [
+const DEMO_CLUBS = [
   { id: "bromley-rally-club", name: "Bromley Rally Club", location: "Crystal Palace, London SE19", members: 248, rating: 4.8, season: "Gold V", trust: 42, description: "Friendly doubles sessions for improver to upper-intermediate players in south east London.", ranking: 1, tournamentsHosted: 6 },
   { id: "greenwich-shuttle-club", name: "Greenwich Shuttle Club", location: "Crystal Palace, London SE19", members: 176, rating: 4.6, season: "Silver III", trust: 29, description: "A coach-led club with a strong beginner pathway and a busy Friday social scene.", ranking: 3, tournamentsHosted: 3 },
   { id: "hackney-smash", name: "Hackney Smash", location: "Crystal Palace, London SE19", members: 132, rating: 4.5, season: "Silver I", trust: 18, description: "East London's fastest-growing club, known for its competitive Thursday matchplay nights.", ranking: 4, tournamentsHosted: 2 },
   { id: "wimbledon-net-club", name: "Wimbledon Net Club", location: "Crystal Palace, London SE19", members: 205, rating: 4.7, season: "Gold II", trust: 37, description: "A long-established club with the borough's most active singles ladder.", ranking: 2, tournamentsHosted: 8 },
 ];
 
+function useCatalogue() {
+ const {catalog}=usePlatform();
+ const liveSessions=catalog.sessions.map(s=>({...s,name:s.title,type:s.details?.kind==='tournament'?'Tournament':s.details?.kind==='coaching'?'Coaching':'Social',club:s.club_name,location:s.venue,distanceMi:0,date:new Date(s.starts_at).toLocaleDateString('en-GB'),timeStart:new Date(s.starts_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),timeEnd:new Date(s.ends_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),price:s.price/100,seats:s.capacity,male:0,female:0,levelMin:1,levelMax:8,courts:s.details?.courts||'See venue details',source:'Club hosted',reliability:0,refundBy:s.cancellation_hours===-1?"No cancellations":new Date(new Date(s.starts_at)-s.cancellation_hours*3600000).toLocaleString('en-GB'),tags:['Club session'],live:true}));
+ const liveClubs=catalog.clubs.map(c=>({...c,location:c.main_area,members:0,rating:'—',season:'New Club',trust:0,description:c.primary_sport+' in '+c.main_area,ranking:'—',tournamentsHosted:0,live:true}));
+ return {SESSIONS:[...liveSessions,...DEMO_SESSIONS.map(s=>({...s,demo:true}))],CLUBS:[...liveClubs,...DEMO_CLUBS.map(c=>({...c,demo:true}))]};
+}
 const RANKINGS = [
   { rank: 1, name: "Aisha Khan", initials: "AK", rating: 2340, matches: 88, wins: 71, winRate: 81 },
   { rank: 2, name: "Priya Nair", initials: "PN", rating: 2298, matches: 76, wins: 60, winRate: 79 },
@@ -301,26 +309,30 @@ function Tabs({ options, value, onChange }) {
 }
 
 function AccountMenu({ open, setOpen, go, openAccountModal }) {
+  const {user}=usePlatform();
+  const current={name:user?.full_name||"Guest",initials:user?.full_name?.split(" ").map(x=>x[0]).join("").slice(0,2)||"BS",level:"—"};
   const items = [
+    {label:"My Clubs",action:()=>go("clubDashboard")},
+    {label:user?"Account / email verification":"Sign in / Create Account",action:()=>openAccountModal("settings")},
     { label: "Coaching", action: () => go("coaching") },
     { label: "Tournaments", action: () => go("tournaments") },
     { label: "View profile", action: () => go("profile") },
     { label: "Organiser portal", action: () => go("organiser") },
     { label: "Settings", action: () => openAccountModal("settings") },
-    { label: "Payment methods", action: () => openAccountModal("methods") },
-    { label: "Payment history", action: () => openAccountModal("history") },
+    { label: "Bookings & payments", action: () => go("bookings") },
+
     { label: "Policies", action: () => openAccountModal("policies") },
   ];
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="ml-1"><Avatar initials={CURRENT_USER.initials} size={9} tone="white" /></button>
+      <button onClick={() => setOpen((o) => !o)} className="ml-1"><Avatar initials={current.initials} size={9} tone="white" /></button>
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-40 mt-2 w-56 rounded-xl border border-stone-200 bg-white p-1.5 text-stone-900 shadow-xl">
             <div className="flex items-center gap-2 border-b border-stone-100 px-2.5 py-2">
-              <Avatar initials={CURRENT_USER.initials} size={8} tone="white" />
-              <div><p className="text-sm font-medium text-stone-900">{CURRENT_USER.name}</p><p className="text-xs text-stone-400">Level {CURRENT_USER.level}</p></div>
+              <Avatar initials={current.initials} size={8} tone="white" />
+              <div><p className="text-sm font-medium text-stone-900">{current.name}</p><p className="text-xs text-stone-400">Level {current.level}</p></div>
             </div>
             <div className="py-1">
               {items.map((it) => (
@@ -330,7 +342,7 @@ function AccountMenu({ open, setOpen, go, openAccountModal }) {
               ))}
             </div>
             <div className="border-t border-stone-100 pt-1">
-              <button onClick={() => setOpen(false)} className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-2 text-left text-sm text-stone-400 hover:bg-stone-50"><LogOut className="h-3.5 w-3.5" /> Log out</button>
+              <button onClick={async () => { await auth?.auth.signOut(); setOpen(false); }} className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-2 text-left text-sm text-stone-400 hover:bg-stone-50"><LogOut className="h-3.5 w-3.5" /> Log out</button>
             </div>
           </div>
         </>
@@ -344,161 +356,11 @@ function AccountMenu({ open, setOpen, go, openAccountModal }) {
    and policies all live behind the avatar, not scattered on the
    profile page.
 ---------------------------------------------------------------- */
-function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMethod, removePaymentMethod, setDefaultMethod, flashToast }) {
-  const [tab, setTab] = useState(initialTab || "settings");
-  const [form, setForm] = useState({ number: "", name: "", exp: "", cvc: "" });
-  const [showAddCard, setShowAddCard] = useState(false);
-
-  React.useEffect(() => { if (open) setTab(initialTab || "settings"); }, [open, initialTab]);
-  if (!open) return null;
-
-  const submitCard = (e) => {
-    e.preventDefault();
-    if (form.number.replace(/\s/g, "").length < 12 || !form.name || !form.exp || form.cvc.length < 3) {
-      flashToast("Check your card details and try again");
-      return;
-    }
-    addPaymentMethod({ id: `pm${Date.now()}`, brand: "Card", last4: form.number.replace(/\s/g, "").slice(-4), exp: form.exp, default: paymentMethods.length === 0 });
-    setForm({ number: "", name: "", exp: "", cvc: "" });
-    setShowAddCard(false);
-    flashToast("Card saved");
-  };
-
-  const TABS = [
-    { value: "settings", label: "Settings" },
-    { value: "methods", label: "Payment methods" },
-    { value: "history", label: "Payment history" },
-    { value: "policies", label: "Policies" },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 p-4">
-      <div className="mx-auto my-8 w-full max-w-2xl rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <Avatar initials={CURRENT_USER.initials} size={10} tone="white" />
-            <div><p className="font-semibold text-stone-900">{CURRENT_USER.name}</p><p className="text-xs text-stone-500">{CURRENT_USER.username || "@" + CURRENT_USER.name.toLowerCase()}</p></div>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700"><X className="h-5 w-5" /></button>
-        </div>
-
-        <div className="px-5 pt-4">
-          <div className="overflow-x-auto">
-            <Tabs options={TABS} value={tab} onChange={setTab} />
-          </div>
-        </div>
-
-        <div className="max-h-96 overflow-y-auto px-5 py-5">
-          {tab === "settings" && (
-            <div className="space-y-4">
-              <p className="text-xs text-stone-400">This is a preview — changes here aren't saved between sessions.</p>
-              <label className="block text-xs font-medium text-stone-500">Full name
-                <input defaultValue={CURRENT_USER.name} className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900" />
-              </label>
-              <label className="block text-xs font-medium text-stone-500">Home area
-                <input defaultValue={CURRENT_USER.homeArea} className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900" />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block text-xs font-medium text-stone-500">Level
-                  <select defaultValue={CURRENT_USER.level} className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900">
-                    {LEVELS.map((l) => <option key={l.n} value={l.n}>Level {l.n} — {l.name}</option>)}
-                  </select>
-                </label>
-                <label className="block text-xs font-medium text-stone-500">Preferred format
-                  <select defaultValue={CURRENT_USER.preferredFormat} className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-900">
-                    <option>Doubles</option><option>Singles</option><option>Mixed doubles</option><option>Coaching</option>
-                  </select>
-                </label>
-              </div>
-              <Button variant="accent" onClick={() => flashToast("Profile updated")}>Save changes</Button>
-            </div>
-          )}
-
-          {tab === "methods" && (
-            <div className="space-y-3">
-              {paymentMethods.length === 0 && <p className="text-sm text-stone-500">No payment methods saved yet.</p>}
-              {paymentMethods.map((m) => (
-                <div key={m.id} className="flex items-center gap-3 rounded-lg border border-stone-200 p-3">
-                  <CreditCard className="h-5 w-5 text-stone-400" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-stone-900">{m.brand} ending {m.last4}</p>
-                    <p className="text-xs text-stone-500">Expires {m.exp}{m.default && <span className="ml-2 text-yellow-700">· Default</span>}</p>
-                  </div>
-                  {!m.default && <button onClick={() => setDefaultMethod(m.id)} className="text-xs text-stone-500 hover:text-stone-900">Make default</button>}
-                  <button onClick={() => removePaymentMethod(m.id)} className="rounded-lg p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
-                </div>
-              ))}
-
-              {showAddCard ? (
-                <form onSubmit={submitCard} className="space-y-3 rounded-lg border border-stone-200 p-3">
-                  <label className="block text-xs font-medium text-stone-500">Card number
-                    <input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} placeholder="4242 4242 4242 4242" className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="block text-xs font-medium text-stone-500">Name on card
-                    <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Benny Smith" className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm" />
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className="block text-xs font-medium text-stone-500">Expiry
-                      <input value={form.exp} onChange={(e) => setForm((f) => ({ ...f, exp: e.target.value }))} placeholder="MM/YY" className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm" />
-                    </label>
-                    <label className="block text-xs font-medium text-stone-500">CVC
-                      <input value={form.cvc} onChange={(e) => setForm((f) => ({ ...f, cvc: e.target.value }))} placeholder="123" className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm" />
-                    </label>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="accent" className="flex-1" type="submit">Save card</Button>
-                    <Button variant="ghost" type="button" onClick={() => setShowAddCard(false)}>Cancel</Button>
-                  </div>
-                  <p className="text-xs text-stone-400">Card details are illustrative only — this preview doesn't process real payments. Ready to wire up to Stripe.</p>
-                </form>
-              ) : (
-                <Button variant="outline" className="w-full" onClick={() => setShowAddCard(true)}><Plus className="h-4 w-4" /> Add payment method</Button>
-              )}
-            </div>
-          )}
-
-          {tab === "history" && (
-            <div className="space-y-2">
-              {CURRENT_USER.paymentHistory.map((p) => (
-                <div key={p.id} className="flex items-center justify-between border-b border-stone-100 py-2.5 text-sm">
-                  <div className="flex items-center gap-2 text-stone-700"><Wallet className="h-3.5 w-3.5 text-stone-400" />{p.label}</div>
-                  <div className="flex items-center gap-3"><span className="text-stone-400">{p.date}</span><span className="font-medium">£{p.amount}</span><Badge tone={p.status === "Refunded" ? "warn" : "accent"}>{p.status}</Badge></div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {tab === "policies" && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Why follow a club?</h3>
-                <ul className="mt-2 space-y-1.5">
-                  {CLUB_BENEFITS.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm text-stone-600"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-600" />{b}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Cancellations & refunds</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-600">Full refund if you cancel before the session's stated refund deadline. After that, seats can't be refunded but you can transfer to a friend from My bookings.</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Level bands</h3>
-                <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                  {LEVELS.map((l) => (
-                    <div key={l.n} className="rounded-lg border border-stone-200 p-2.5">
-                      <p className="text-xs font-medium text-stone-900">L{l.n} — {l.name}</p>
-                      <p className="text-xs text-stone-500">{l.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+function AccountModal({open,onClose,initialTab}) {
+ if(!open)return null;
+ if(initialTab==='policies')return <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 p-4"><div className="workspace-card max-w-2xl mx-auto my-8"><button onClick={onClose} className="float-right" aria-label="Close policies">✕</button><h2>Cancellations & refunds</h2><p className="my-4 text-sm">Cancellation and full-refund eligibility follow the deadline shown on each Session. Club Owners and Admins handle refund requests. Payment details are collected by Stripe.</p><h2>Level bands</h2><div className="grid gap-3 mt-4 sm:grid-cols-2">{LEVELS.map(l=><div key={l.n} className="rounded-lg border p-3"><strong>L{l.n} — {l.name}</strong><p className="text-sm text-stone-500">{l.detail}</p></div>)}</div></div></div>;
+ if(['methods','history'].includes(initialTab))return <div className="fixed inset-0 z-50 bg-stone-900/50 p-4"><div className="workspace-card max-w-md mx-auto my-8"><button onClick={onClose} className="float-right" aria-label="Close payment information">✕</button><h2>Payments</h2><p className="my-4">Payment and refund status appears in Bookings. Card details are collected securely by Stripe during checkout.</p></div></div>;
+ return <AuthPanel onClose={onClose}/>;
 }
 function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
   return (
@@ -570,7 +432,7 @@ function SessionCard({ session, onOpen, favorites, toggleFav }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-stone-900">{session.name}</h3>
+                <h3 className="font-semibold text-stone-900">{session.name}</h3>{session.demo&&<span className="text-xs text-stone-400">Demo Session</span>}
                 <button onClick={(e) => { e.stopPropagation(); toggleFav(session.id); }} aria-label="Save session">
                   <Heart className={`h-4 w-4 ${isFav ? "fill-red-500 text-red-500" : "text-stone-300"}`} />
                 </button>
@@ -600,6 +462,7 @@ function SessionCard({ session, onOpen, favorites, toggleFav }) {
    DISCOVER PAGE
 ---------------------------------------------------------------- */
 function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   const [filters, setFilters] = useState({ date: "any", level: "any", type: "any" });
 
   const filtered = useMemo(() => SESSIONS.filter((s) => {
@@ -609,7 +472,7 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
       if (s.levelMax < lo || s.levelMin > hi) return false;
     }
     return true;
-  }), [filters]);
+  }), [filters, SESSIONS]);
 
   const types = ["any", ...Array.from(new Set(SESSIONS.map((s) => s.type)))];
 
@@ -689,10 +552,11 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
    EVENT DETAIL + PAYMENT
 ---------------------------------------------------------------- */
 function EventDetailPage({ eventId, go, bookings, followedClubs, toggleFollow }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   const session = SESSIONS.find((s) => s.id === eventId) || SESSIONS[0];
   const left = seatsLeft(session);
   const full = left === 0;
-  const isBooked = bookings.some((b) => b.id === session.id);
+  const isBooked = bookings.some((b) => b.id === session.id && ["pending","confirmed"].includes(b.status));
   const club = CLUBS.find((c) => c.name === session.club);
   const saved = club && followedClubs.includes(club.id);
   const roster = useMemo(() => rosterFor(session), [session]);
@@ -805,9 +669,12 @@ function EventDetailPage({ eventId, go, bookings, followedClubs, toggleFollow })
 }
 
 function PaymentPage({ eventId, go, book }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   const session = SESSIONS.find((s) => s.id === eventId) || SESSIONS[0];
   const [step, setStep] = useState("review");
-  const fee = Math.round(session.price * 0.05 * 100) / 100;
+  const [message,setMessage]=useState("");
+  const [busy,setBusy]=useState(false);
+  const fee = 0;
   const total = session.price + fee;
   const full = seatsLeft(session) === 0;
 
@@ -838,17 +705,10 @@ function PaymentPage({ eventId, go, book }) {
           <div className="flex justify-between font-semibold text-stone-900"><span>Total</span><span>£{total.toFixed(2)}</span></div>
         </div>
       </Card>
-      <div className="mt-5">
-        <h2 className="text-sm font-semibold text-stone-900">Payment method</h2>
-        <Card className="mt-2 flex items-center gap-3 p-4">
-          <CreditCard className="h-5 w-5 text-stone-400" />
-          <div className="flex-1"><p className="text-sm font-medium text-stone-900">Visa ending 4242</p><p className="text-xs text-stone-500">Processed securely via Stripe</p></div>
-          <Check className="h-4 w-4 text-yellow-600" />
-        </Card>
-      </div>
-      <p className="mt-4 text-xs text-stone-400">No real payment is taken in this preview. Full refund available before {session.refundBy}.</p>
-      <Button variant="accent" className="mt-6 w-full" onClick={() => { book(session.id); setStep("confirmed"); }}>
-        {full ? "Join waitlist" : `Pay £${total.toFixed(2)}`}
+      <p className="mt-4 text-sm text-stone-500">{session.demo?"This is a demo Session. Real bookings are available for Sessions published by Clubs.":"Card details are collected securely on Stripe. Payment confirmation comes from the provider."}</p>
+      {message&&<p className="creation-note" role="status">{message}</p>}
+      <Button variant="accent" className="mt-6 w-full" disabled={busy||session.demo} onClick={async () => {setBusy(true);try{const r=await api("checkout",{session_id:session.id});if(r.url)window.location.assign(r.url);else {await book();setStep("confirmed");}}catch(e){setMessage(e.message);}finally{setBusy(false);}}}>
+        {busy?"Please wait…":session.demo?"Demo Session":total===0?"Book free Session":`Continue to payment · £${total.toFixed(2)}`}
       </Button>
     </div>
   );
@@ -858,6 +718,7 @@ function PaymentPage({ eventId, go, book }) {
    MY BOOKINGS
 ---------------------------------------------------------------- */
 function BookingsPage({ bookings, cancel, go, openAccountModal }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8">
       <div className="flex items-center justify-between">
@@ -873,10 +734,10 @@ function BookingsPage({ bookings, cancel, go, openAccountModal }) {
       ) : (
         <div className="mt-5 space-y-3">
           {bookings.map((b) => {
-            const s = SESSIONS.find((x) => x.id === b.id);
+            const s = SESSIONS.find((x) => x.id === b.id) || {name:b.title,date:new Date(b.starts_at).toLocaleDateString(),timeStart:new Date(b.starts_at).toLocaleTimeString(),club:b.club_name};
             if (!s) return null;
             return (
-              <Card key={b.id} className="flex items-center gap-4 p-4">
+              <Card key={b.bookingId||b.id} className="flex items-center gap-4 p-4">
                 <Photo id={PHOTOS.session} alt={s.name} className="h-16 w-16 rounded-lg shrink-0" overlay={false} />
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-medium text-stone-900">{s.name}</p>
@@ -884,8 +745,8 @@ function BookingsPage({ bookings, cancel, go, openAccountModal }) {
                   <p className="text-xs text-stone-400">{s.club}</p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <Badge tone="accent">Confirmed</Badge>
-                  <button onClick={() => cancel(b.id)} className="text-xs text-stone-400 hover:text-red-600">Cancel</button>
+                  <Badge tone="accent">{b.status}</Badge>
+                  {b.status==="confirmed" && <button onClick={() => cancel(b.id)} className="text-xs text-stone-400 hover:text-red-600">Cancel</button>}
                 </div>
               </Card>
             );
@@ -900,12 +761,14 @@ function BookingsPage({ bookings, cancel, go, openAccountModal }) {
    PROFILE — "Sports passport"
 ---------------------------------------------------------------- */
 function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
-  const u = CURRENT_USER;
+  const {SESSIONS,CLUBS}=useCatalogue();
+  const {user}=usePlatform();
+  const u = user?{...CURRENT_USER,name:user.full_name,initials:user.full_name.split(' ').map(x=>x[0]).join('').slice(0,2),level:0,homeArea:'Not set',preferredFormat:'Not set',reliability:'Not yet measured',stats:{activities:bookings.filter(b=>b.status==='confirmed').length,clubs:0,totalHours:0,noShows:0,wins:0,losses:0,winRate:0,ranking:'—'},achievements:[],paymentHistory:[]}:CURRENT_USER;
   const myClubs = CLUBS.filter((c) => followedClubs.includes(c.id));
   const level = LEVELS.find((l) => l.n === u.level);
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8">
-      <Badge tone="accent">Sports passport</Badge>
+      <Badge tone="accent">{user?"Sports passport":"Demo Sports passport"}</Badge>
       <div className="mt-3 flex items-center gap-4">
         <button onClick={() => openAccountModal("settings")}><Avatar initials={u.initials} size={16} tone="white" /></button>
         <div className="flex-1">
@@ -947,7 +810,7 @@ function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
 
       <SectionCard title={`Clubs you follow (${myClubs.length})`} action={<button onClick={() => openAccountModal("policies")} className="text-xs font-medium text-stone-500 hover:text-stone-900">Why follow? →</button>}>
         {myClubs.length === 0 ? (
-          <p className="text-sm text-stone-500">You're not following any clubs yet — visit a club profile and tap "Join club".</p>
+          <p className="text-sm text-stone-500">You're not following any clubs yet — visit a club profile and tap "Follow club".</p>
         ) : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {myClubs.map((c) => (
@@ -964,7 +827,7 @@ function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
         {bookings.length === 0 ? <p className="text-sm text-stone-500">No upcoming bookings.</p> : (
           <div className="divide-y divide-stone-100">
             {bookings.map((b) => {
-              const s = SESSIONS.find((x) => x.id === b.id);
+              const s = SESSIONS.find((x) => x.id === b.id) || {name:b.title,date:new Date(b.starts_at).toLocaleDateString(),timeStart:new Date(b.starts_at).toLocaleTimeString(),club:b.club_name};
               return s ? (
                 <div key={b.id} className="flex items-center justify-between py-2 text-sm">
                   <span className="text-stone-700">{s.name}</span><span className="text-stone-400">{s.date}</span>
@@ -1022,6 +885,7 @@ function RankingsPage() {
    CLUBS
 ---------------------------------------------------------------- */
 function ClubsPage({ openClub, followedClubs }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   const myClubs = CLUBS.filter((c) => followedClubs.includes(c.id));
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-8">
@@ -1033,7 +897,7 @@ function ClubsPage({ openClub, followedClubs }) {
           <h2 className="text-sm font-semibold text-stone-900">Clubs you follow ({myClubs.length})</h2>
         </div>
         {myClubs.length === 0 ? (
-          <p className="mt-1.5 text-sm text-stone-600">You're not following any clubs yet — open a club below and tap "Join club" to keep it here.</p>
+          <p className="mt-1.5 text-sm text-stone-600">You're not following any clubs yet — open a club below and tap "Follow club" to keep it here.</p>
         ) : (
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {myClubs.map((c) => (
@@ -1074,6 +938,7 @@ function ClubsPage({ openClub, followedClubs }) {
   );
 }
 function ClubDetailPage({ clubId, go, followedClubs, toggleFollow }) {
+  const {SESSIONS,CLUBS}=useCatalogue();
   const club = CLUBS.find((c) => c.id === clubId) || CLUBS[0];
   const following = followedClubs.includes(club.id);
   const clubSessions = SESSIONS.filter((s) => s.club === club.name);
@@ -1083,7 +948,7 @@ function ClubDetailPage({ clubId, go, followedClubs, toggleFollow }) {
       <Photo id={PHOTOS.club} alt={club.name} className="h-40 w-full rounded-xl" overlay={false} />
       <div className="mt-5 flex items-start justify-between gap-3">
         <div><h1 className="text-2xl font-semibold text-stone-900">{club.name}</h1><p className="mt-1 text-stone-500">{club.location}</p></div>
-        <Button variant={following ? "secondary" : "accent"} onClick={() => toggleFollow(club.id)}>{following ? "Following ✓" : "Join club"}</Button>
+        <Button variant={following ? "secondary" : "accent"} onClick={() => toggleFollow(club.id)}>{following ? "Following ✓" : "Follow club"}</Button>
       </div>
 
       <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-3.5">
@@ -1358,22 +1223,24 @@ function OrganiserPage() {
    ROOT APP
 ---------------------------------------------------------------- */
 export default function FlashX() {
-  const [view, setView] = useState("discover");
+  const {SESSIONS,CLUBS}=useCatalogue();
+  const [view, setView] = useState(new URLSearchParams(window.location.search).has("invitation")?"invitation":new URLSearchParams(window.location.search).has("club")?"clubDashboard":new URLSearchParams(window.location.search).has("booking")?"bookings":"discover");
   const [createOpen, setCreateOpen] = useState(false);
-  const [params, setParams] = useState({});
-  const [bookings, setBookings] = useState([]);
+  const [params, setParams] = useState({clubId:new URLSearchParams(window.location.search).get("club")});
+  const {bookings:realBookings,refresh,user}=usePlatform();
+  const bookings=realBookings.map(b=>({...b,id:b.session_id,bookingId:b.id}));
   const [favorites, setFavorites] = useState([]);
   const [followedClubs, setFollowedClubs] = useState([]);
   const [registeredTournaments, setRegisteredTournaments] = useState([]);
-  const [paymentMethods, setPaymentMethods] = useState([{ id: "pm1", brand: "Visa", last4: "4242", exp: "08/28", default: true }]);
+
   const [notifOpen, setNotifOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [accountModal, setAccountModal] = useState({ open: false, tab: "settings" });
+  const [accountModal, setAccountModal] = useState({ open: /reset|verified/.test(window.location.search), tab: "settings" });
   const [toast, setToast] = useState(null);
 
   const go = (v, p = {}) => { if(v === "create") { setCreateOpen(true); return; } setView(v); setParams(p); setNotifOpen(false); setAccountOpen(false); window.scrollTo(0, 0); };
-  const book = (id) => setBookings((b) => (b.some((x) => x.id === id) ? b : [...b, { id }]));
-  const cancel = (id) => setBookings((b) => b.filter((x) => x.id !== id));
+  const book = () => refresh();
+  const cancel = async (id) => {const b=bookings.find(x=>x.id===id);try{await api("cancel-booking",{booking_id:b.bookingId,reason:"Player cancellation"});await refresh();}catch(e){setToast(e.message);}};
   const toggleFav = (id) => setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
   const flashToast = (msg) => setToast(msg);
 
@@ -1395,15 +1262,6 @@ export default function FlashX() {
   };
   const openAccountModal = (tab = "settings") => { setAccountOpen(false); setNotifOpen(false); setAccountModal({ open: true, tab }); };
   const closeAccountModal = () => setAccountModal((m) => ({ ...m, open: false }));
-  const addPaymentMethod = (m) => setPaymentMethods((list) => [...list, m]);
-  const removePaymentMethod = (id) => setPaymentMethods((list) => {
-    const removed = list.find((m) => m.id === id);
-    const rest = list.filter((m) => m.id !== id);
-    if (removed?.default && rest.length) rest[0].default = true;
-    flashToast("Payment method removed");
-    return rest;
-  });
-  const setDefaultMethod = (id) => setPaymentMethods((list) => list.map((m) => ({ ...m, default: m.id === id })));
 
   React.useEffect(() => {
     if (!toast) return;
@@ -1411,7 +1269,7 @@ export default function FlashX() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "Profile", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
+  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "Bookings", clubDashboard: "My Clubs", profile: "Profile", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
@@ -1429,9 +1287,11 @@ export default function FlashX() {
       {view === "tournaments" && <TournamentsPage openTournament={(id) => go("tournamentDetail", { tournamentId: id })} registeredTournaments={registeredTournaments} />}
       {view === "tournamentDetail" && <TournamentDetailPage tournamentId={params.tournamentId} go={go} registeredTournaments={registeredTournaments} toggleRegister={toggleRegister} />}
       {view === "organiser" && <OrganiserPage />}
-      {view === "create-session" && <EventForm key="session" onBack={() => go("discover")} />}
-      {view === "create-tournament" && <EventForm key="tournament" kind="tournament" onBack={() => go("discover")} />}
-      {view === "create-club" && <ClubForm onBack={() => go("clubs")} />}
+      {view === "clubDashboard" && <VerifiedGate onAuth={()=>openAccountModal()}><ClubDashboard clubId={params.clubId} onSelect={clubId=>go("clubDashboard",{clubId})} onCreate={()=>go("create-club")} onSession={(clubId,initialSession)=>go("create-session",{clubId,initialSession})}/></VerifiedGate>}
+      {view === "invitation" && <VerifiedGate onAuth={()=>openAccountModal()}><InvitationPage onAccepted={clubId=>go("clubDashboard",{clubId})}/></VerifiedGate>}
+      {view === "create-session" && <VerifiedGate onAuth={()=>openAccountModal()}><EventForm key={params.initialSession?.id||"session"} clubId={params.clubId} initialSession={params.initialSession} onPaymentSetup={clubId=>go("clubDashboard",{clubId})} onBack={() => go("clubDashboard",{clubId:params.clubId})} /></VerifiedGate>}
+      {view === "create-tournament" && <VerifiedGate onAuth={()=>openAccountModal()}><EventForm key="tournament" kind="tournament" onPaymentSetup={clubId=>go("clubDashboard",{clubId})} onBack={() => go("discover")} /></VerifiedGate>}
+      {view === "create-club" && <VerifiedGate onAuth={()=>openAccountModal()}><ClubForm onCreated={clubId=>go("clubDashboard",{clubId})} onBack={() => go("clubs")} /></VerifiedGate>}
       {view === "coaching" && <CoachingFlow onBack={() => go("discover")} />}
       {createOpen && <CreateSheet onClose={() => setCreateOpen(false)} onChoose={kind => { setCreateOpen(false); go(kind === "coaching" ? "coaching" : `create-${kind}`); }} />}
 
@@ -1439,10 +1299,6 @@ export default function FlashX() {
         open={accountModal.open}
         initialTab={accountModal.tab}
         onClose={closeAccountModal}
-        paymentMethods={paymentMethods}
-        addPaymentMethod={addPaymentMethod}
-        removePaymentMethod={removePaymentMethod}
-        setDefaultMethod={setDefaultMethod}
         flashToast={flashToast}
       />
 
