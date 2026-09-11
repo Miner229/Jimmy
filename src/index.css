@@ -85,11 +85,12 @@
 
 .jimmi-feature-icon svg { width: 21px; height: 21px; }
 
-.feature-autoscroll { position: relative; padding-right: 22px; }
-.feature-scroll-toggle { position: absolute; top: 4px; right: -6px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #78716c; background: #fafaf9; }
-.feature-scroll-toggle:focus-visible { outline: 2px solid #ca8a04; }
-@media(prefers-reduced-motion: reduce) { .feature-scroll-toggle { display: none; } }
-
-.feature-loop-strip { display: flex; gap: 0; padding-inline: 0; scrollbar-width: none; }
-.feature-loop-strip::-webkit-scrollbar { display: none; }
+.feature-autoscroll { position: relative; }
+.feature-loop-window { overflow: hidden; }
+.feature-loop-track { display: flex; width: max-content; animation: feature-move-right 32s linear infinite; }
 .feature-loop-group { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); gap: 4px; width: max(928px,100vw); flex: 0 0 auto; padding-right: 4px; }
+/* Three identical groups: increasing translateX moves each icon to the right. */
+@keyframes feature-move-right { from { transform: translateX(-33.333333%); } to { transform: translateX(0); } }
+.feature-loop-window:focus-within .feature-loop-track, .feature-loop-window:active .feature-loop-track { animation-play-state: paused; }
+@media(hover:hover) { .feature-loop-window:hover .feature-loop-track { animation-play-state: paused; } }
+@media(prefers-reduced-motion:reduce) { .feature-loop-track { animation: none; } .feature-loop-group[aria-hidden=true] { display: none; } .feature-loop-window { overflow-x: auto; } }
