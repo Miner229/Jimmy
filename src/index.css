@@ -8,3 +8,33 @@
 .brand-logo { position: relative; display: block; width: 128px; aspect-ratio: 960 / 232; overflow: hidden; mix-blend-mode: lighten; }
 .brand-logo img { position: absolute; width: 133.333333%; max-width: none; height: auto; left: -16.666667%; top: -83.62069%; }
 @media (min-width: 768px) { .brand-logo { width: 156px; } }
+
+.discover-list { scroll-margin-top: 66px; }
+.discover-controls { scroll-margin-top: 63px; position: sticky; top: 62px; z-index: 15; background: #fff; border-bottom: 1px solid #e7e5e4; }
+.discover-search { display: block; padding: 12px 16px 0; }
+.discover-search input { width: 100%; border-radius: 24px; padding: 10px 16px; background: #f5f5f4; }
+.discover-dates { display: flex; overflow-x: auto; padding: 12px 8px; }
+.discover-dates button { flex: 1 0 42px; border-radius: 12px; padding: 8px 2px; font-size: 12px; color: #78716c; }
+.discover-dates span { display: block; font-size: 20px; margin-top: 3px; }
+.discover-controls [aria-pressed=true] { background: #fef9c3; color: #713f12; }
+.discover-filterbar { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid #f5f5f4; }
+.discover-filterbar button { padding: 14px 4px; font-size: 14px; }
+.discover-filterbar [aria-expanded=true] { color: #a16207; }
+.discover-panel { position: absolute; top: 100%; left: 0; right: 0; background: white; padding: 16px 20px; border-radius: 0 0 20px 20px; box-shadow: 0 10px 20px #0002; z-index: 2; max-height: calc(100dvh - 340px); overflow-y: auto; }
+.discover-backdrop { position: absolute; left: 0; top: 100%; background: #0005; height: 100vh; width: 100%; z-index: 1; }
+.discover-option { display: block; width: 100%; text-align: left; padding: 12px; border-radius: 8px; }
+.nearby-options { display: grid; grid-template-columns: 1fr 2fr; margin-top: 12px; }
+.nearby-options > span { padding: 12px; color: #a16207; }
+.time-inputs, .filter-selects, .filter-actions { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
+.time-inputs input, .filter-selects label { min-width: 0; flex: 1; width: 40%; }
+.time-inputs input, .filter-selects select { border: 1px solid #d6d3d1; border-radius: 10px; padding: 10px; }
+.filter-selects select { display: block; width: 100%; margin-top: 6px; }
+.time-presets { display: flex; gap: 8px; margin: 12px 0 20px; }
+.time-presets button { flex: 1; border-radius: 10px; padding: 10px 4px; background: #f5f5f4; }
+.filter-actions button { flex: 1; padding: 12px; border: 1px solid #a8a29e; border-radius: 24px; }
+.filter-actions button:last-child { background: #facc15; border-color: #facc15; }
+.filter-actions button:disabled { opacity: .4; }
+.location-status { padding: 0 16px 8px; font-size: 11px; color: #78716c; display: flex; gap: 10px; align-items: center; }
+.location-status button, .location-button { color: #854d0e; text-decoration: underline; flex-shrink: 0; }
+.discover-list #results { padding: 0 16px 24px; }
+@media(min-width:768px) { .discover-controls { top: 63px; } .discover-search, .discover-list #results { padding-left: 32px; padding-right: 32px; } .discover-panel { max-width: 640px; margin-left: auto; } }

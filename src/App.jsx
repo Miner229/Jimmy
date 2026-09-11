@@ -1,3 +1,5 @@
+import DiscoverFilters from './DiscoverFilters.jsx';
+import { defaultFilters, filterSessions } from './discoverFilters.js';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
 import React, { useState, useReducer, useMemo } from "react";
 import {
@@ -51,14 +53,16 @@ const LEVELS = [
   { n: 9, name: "Performance", detail: "County, university first-team or semi-professional standard." },
 ];
 
+// Illustrative venue coordinates: https://mapcarta.com/W1364508412
+// Legacy September sample dates are kept in 2025, not rolled forward into live events.
 const SESSIONS = [
-  { id: "game-1", name: "Tuesday Improver Doubles", type: "Doubles", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Tue 2 Sep", timeStart: "19:00", timeEnd: "21:00", price: 8, seats: 16, going: 9, male: 5, female: 4, levelMin: 2, levelMax: 4, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 88, refundBy: "2 Sep, 02:00", tags: ["Level matched", "Shuttles included"] },
-  { id: "game-2", name: "Bromley Fast Rotation", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Thu 4 Sep", timeStart: "20:00", timeEnd: "22:00", price: 9, seats: 16, going: 16, male: 10, female: 6, levelMin: 4, levelMax: 6, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 91, refundBy: "3 Sep, 20:00", tags: ["Waitlist refill", "Fast rotation"] },
-  { id: "game-3", name: "Sunday Social Courts", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Sun 6 Sep", timeStart: "10:00", timeEnd: "12:00", price: 7, seats: 16, going: 11, male: 8, female: 3, levelMin: 1, levelMax: 3, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 84, refundBy: "5 Sep, 10:00", tags: ["Beginner friendly", "Racket support"] },
-  { id: "game-4", name: "Advanced Matchplay", type: "Doubles", club: "Bromley Rally Club", location: "Crystal Palace", distanceMi: 0.3, date: "Tue 9 Sep", timeStart: "19:30", timeEnd: "21:30", price: 10, seats: 16, going: 14, male: 8, female: 6, levelMin: 6, levelMax: 8, courts: "3 courts · Courts 2–4", source: "Club hosted", reliability: 90, refundBy: "8 Sep, 19:30", tags: ["Competitive", "Level checked"] },
-  { id: "game-5", name: "Greenwich Mixed Doubles", type: "Doubles", club: "Greenwich Shuttle Club", location: "Crystal Palace", distanceMi: 0.3, date: "Mon 1 Sep", timeStart: "18:30", timeEnd: "20:30", price: 8, seats: 16, going: 12, male: 8, female: 4, levelMin: 3, levelMax: 5, courts: "4 courts · Courts A–D", source: "Club hosted", reliability: 86, refundBy: "31 Aug, 18:30", tags: ["Balanced pairs", "Level matched"] },
-  { id: "game-6", name: "Beginner Rally Night", type: "Coaching", club: "Greenwich Shuttle Club", location: "Crystal Palace", distanceMi: 0.3, date: "Wed 3 Sep", timeStart: "19:00", timeEnd: "20:30", price: 11, seats: 12, going: 10, male: 7, female: 3, levelMin: 1, levelMax: 2, courts: "2 courts · Courts A–B", source: "Coach led", reliability: 95, refundBy: "2 Sep, 19:00", tags: ["Coach led", "Rackets available"] },
-  { id: "game-7", name: "Friday Full Court", type: "Social", club: "Greenwich Shuttle Club", location: "Crystal Palace", distanceMi: 0.3, date: "Fri 5 Sep", timeStart: "19:30", timeEnd: "21:30", price: 9, seats: 16, going: 16, male: 9, female: 7, levelMin: 4, levelMax: 6, courts: "4 courts · Courts A–D", source: "Club hosted", reliability: 89, refundBy: "4 Sep, 19:30", tags: ["Full session", "Auto refill"] },
+  { id: "game-1", name: "Tuesday Improver Doubles", type: "Doubles", club: "Bromley Rally Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-02", date: "Tue 2 Sep", timeStart: "19:00", timeEnd: "21:00", price: 8, seats: 16, going: 9, male: 5, female: 4, levelMin: 2, levelMax: 4, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 88, refundBy: "2 Sep, 02:00", tags: ["Level matched", "Shuttles included"] },
+  { id: "game-2", name: "Bromley Fast Rotation", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-04", date: "Thu 4 Sep", timeStart: "20:00", timeEnd: "22:00", price: 9, seats: 16, going: 16, male: 10, female: 6, levelMin: 4, levelMax: 6, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 91, refundBy: "3 Sep, 20:00", tags: ["Waitlist refill", "Fast rotation"] },
+  { id: "game-3", name: "Sunday Social Courts", type: "Social", club: "Bromley Rally Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-06", date: "Sun 6 Sep", timeStart: "10:00", timeEnd: "12:00", price: 7, seats: 16, going: 11, male: 8, female: 3, levelMin: 1, levelMax: 3, courts: "4 courts · Courts 1–4", source: "Club hosted", reliability: 84, refundBy: "5 Sep, 10:00", tags: ["Beginner friendly", "Racket support"] },
+  { id: "game-4", name: "Advanced Matchplay", type: "Doubles", club: "Bromley Rally Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-09", date: "Tue 9 Sep", timeStart: "19:30", timeEnd: "21:30", price: 10, seats: 16, going: 14, male: 8, female: 6, levelMin: 6, levelMax: 8, courts: "3 courts · Courts 2–4", source: "Club hosted", reliability: 90, refundBy: "8 Sep, 19:30", tags: ["Competitive", "Level checked"] },
+  { id: "game-5", name: "Greenwich Mixed Doubles", type: "Doubles", club: "Greenwich Shuttle Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-01", date: "Mon 1 Sep", timeStart: "18:30", timeEnd: "20:30", price: 8, seats: 16, going: 12, male: 8, female: 4, levelMin: 3, levelMax: 5, courts: "4 courts · Courts A–D", source: "Club hosted", reliability: 86, refundBy: "31 Aug, 18:30", tags: ["Balanced pairs", "Level matched"] },
+  { id: "game-6", name: "Beginner Rally Night", type: "Coaching", club: "Greenwich Shuttle Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-03", date: "Wed 3 Sep", timeStart: "19:00", timeEnd: "20:30", price: 11, seats: 12, going: 10, male: 7, female: 3, levelMin: 1, levelMax: 2, courts: "2 courts · Courts A–B", source: "Coach led", reliability: 95, refundBy: "2 Sep, 19:00", tags: ["Coach led", "Rackets available"] },
+  { id: "game-7", name: "Friday Full Court", type: "Social", club: "Greenwich Shuttle Club", location: "Crystal Palace", coordinates: { latitude: 51.42009, longitude: -0.06889 }, dateISO: "2025-09-05", date: "Fri 5 Sep", timeStart: "19:30", timeEnd: "21:30", price: 9, seats: 16, going: 16, male: 9, female: 7, levelMin: 4, levelMax: 6, courts: "4 courts · Courts A–D", source: "Club hosted", reliability: 89, refundBy: "4 Sep, 19:30", tags: ["Full session", "Auto refill"] },
 ];
 const seatsLeft = (s) => Math.max(0, s.seats - s.going);
 
@@ -576,7 +580,7 @@ function SessionCard({ session, onOpen, favorites, toggleFav }) {
                   <Heart className={`h-4 w-4 ${isFav ? "fill-red-500 text-red-500" : "text-stone-300"}`} />
                 </button>
               </div>
-              <p className="text-sm text-stone-500">{session.location} · {session.type}</p>
+              <p className="text-sm text-stone-500">{session.location} · {session.type}{session.distanceKm != null && ` · ${session.distanceKm.toFixed(1)} km away`}</p>
             </div>
             <p className="shrink-0 text-lg font-semibold text-stone-900">£{session.price}</p>
           </div>
@@ -601,81 +605,40 @@ function SessionCard({ session, onOpen, favorites, toggleFav }) {
    DISCOVER PAGE
 ---------------------------------------------------------------- */
 function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
-  const [filters, setFilters] = useState({ date: "any", level: "any", type: "any" });
-
-  const filtered = useMemo(() => SESSIONS.filter((s) => {
-    if (filters.type !== "any" && s.type !== filters.type) return false;
-    if (filters.level !== "any") {
-      const [lo, hi] = filters.level.split("-").map(Number);
-      if (s.levelMax < lo || s.levelMin > hi) return false;
-    }
-    return true;
-  }), [filters]);
+  const [filters, setFilters] = useState({...defaultFilters});
+  const [position, setPosition] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [locationMessage, setLocationMessage] = useState('');
+  function locate() {
+    if (!navigator.geolocation) {setLocationMessage('Location is not supported by this browser.');return;}
+    setLocating(true);
+    setLocationMessage('');
+    navigator.geolocation.getCurrentPosition(p=>{setPosition({latitude:p.coords.latitude,longitude:p.coords.longitude});setLocating(false);setLocationMessage('Distances are approximate, in a straight line.');},e=>{setLocating(false);setLocationMessage(e.code===1?'Location access denied. Enable it in your browser settings to find nearby sessions.':e.code===3?'Location request timed out. Please try again.':'Could not determine your location. Please try again.');setFilters(f=>({...f,radius:'any',sort:f.sort==='distance'?'smart':f.sort}));},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  }
+  const filtered = useMemo(() => filterSessions(SESSIONS,filters,position), [filters,position]);
 
   const types = ["any", ...Array.from(new Set(SESSIONS.map((s) => s.type)))];
 
   return (
     <div>
-      <section className="relative h-72 overflow-hidden bg-stone-900 sm:h-80">
+      <section className="relative h-44 overflow-hidden bg-stone-900 sm:h-48">
         <div className="absolute inset-0 z-0">
           <Photo id={PHOTOS.hero} alt="Players on an indoor badminton court" className="h-full w-full" overlay={false} />
         </div>
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-stone-900 via-stone-900/75 to-stone-900/20" />
         <div className="relative z-10 flex h-full max-w-lg flex-col justify-center px-4 sm:px-8">
-          <Badge tone="accent">JimmiPlay</Badge>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">Book badminton sessions, courts and tournaments.</h1>
           <p className="mt-2 text-sm text-stone-300">JimmiPlay is where London's badminton players find each other — book a session by level and location, follow your club, and track your ranking, all in one place.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="accent" onClick={() => document.getElementById("session-list")?.scrollIntoView({ behavior: "smooth" })}>
               <Search className="h-4 w-4" /> Find a session
             </Button>
-            <Button variant="outline" className="border-stone-500 text-white hover:bg-stone-800" onClick={() => openAccountModal("settings")}>Sign up / Create profile</Button>
           </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 border-b border-stone-200 px-4 py-4 sm:grid-cols-4 sm:px-8">
-        <StatBlock label="Available sessions" value={SESSIONS.length} />
-        <StatBlock label="Clubs" value={CLUBS.length} />
-        <StatBlock label="Courts" value="27" />
-        <StatBlock label="Avg. reliability" value="89%" />
-      </section>
-
-      <section id="session-list" className="px-4 py-6 sm:px-8">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-stone-400" />
-          <h2 className="text-lg font-semibold text-stone-900">Search sessions</h2>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 sm:grid-cols-4">
-            <label className="text-xs text-stone-500">Event type
-              <select className="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm" value={filters.type} onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}>
-                {types.map((t) => <option key={t} value={t}>{t === "any" ? "Any type" : t}</option>)}
-              </select>
-            </label>
-            <label className="text-xs text-stone-500">Level
-              <select className="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm" value={filters.level} onChange={(e) => setFilters((f) => ({ ...f, level: e.target.value }))}>
-                <option value="any">Any level</option>
-                <option value="1-3">Beginner L1–L3</option>
-                <option value="3-6">Club social L3–L6</option>
-                <option value="6-9">Advanced L6–L9</option>
-              </select>
-            </label>
-            <label className="text-xs text-stone-500">Distance
-              <select className="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm" defaultValue="near">
-                <option value="near">Near to far</option>
-                <option value="far">Far to near</option>
-              </select>
-            </label>
-            <label className="text-xs text-stone-500">Date
-              <select className="mt-1 block w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm" defaultValue="any">
-                <option value="any">All dates</option>
-                <option>Today</option>
-                <option>This week</option>
-              </select>
-            </label>
-        </div>
-
+      <section id="session-list" className="discover-list">
+        <h1 className="sr-only">Find badminton sessions</h1>
+        <DiscoverFilters filters={filters} setFilters={setFilters} locate={locate} locating={locating} locationMessage={locationMessage} hasLocation={Boolean(position)} types={types}/>
         <div id="results" className="mt-6 space-y-3">
           {filtered.length === 0 ? (
             <p className="py-10 text-center text-sm text-stone-500">No sessions match those filters. Try widening your search.</p>
