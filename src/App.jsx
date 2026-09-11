@@ -1,3 +1,4 @@
+import AutoScrollFeatures from './AutoScrollFeatures.jsx';
 import DiscoverFilters from './DiscoverFilters.jsx';
 import { defaultFilters, filterSessions } from './discoverFilters.js';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
@@ -639,7 +640,7 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal, go })
       </section>
 
       <section className="jimmi-features" aria-label="Explore JimmiPlay features">
-        <div className="jimmi-feature-strip">
+        <AutoScrollFeatures>
           {[
             {name:'Sessions',detail:'Find your next game',icon:Calendar,action:()=>document.getElementById('session-list')?.scrollIntoView({behavior:'smooth'})},
             {name:'Sports Passport',detail:'Your player journey',icon:Contact,action:()=>go('profile')},
@@ -650,7 +651,7 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal, go })
             {name:'Shop',detail:'Shuttles & gear',icon:ShoppingBag,action:()=>setFeatureInfo(featureInfo==='shop'?null:'shop')},
             {name:'Tournaments',detail:'Rise to the challenge',icon:Trophy,action:()=>go('tournaments')},
           ].map(({name,detail,icon:Icon,action})=><button className="jimmi-feature" key={name} onClick={action}><span className="jimmi-feature-icon"><Icon size={25} strokeWidth={1.7}/></span><strong>{name}</strong><span className="jimmi-feature-detail">{detail}</span>{name==='Shop'&&<span className="jimmi-feature-soon">Coming soon</span>}</button>)}
-        </div>
+        </AutoScrollFeatures>
         {featureInfo&&<div className="jimmi-feature-info"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold">{featureInfo==='levels'?'Find your level':'JimmiPlay Shop'}</h2><button aria-label="Close feature details" onClick={()=>setFeatureInfo(null)}><X size={18}/></button></div>{featureInfo==='levels'?<div className="jimmi-level-grid">{LEVELS.map(l=><div key={l.n}><strong>L{l.n} · {l.name}</strong><p>{l.detail}</p></div>)}</div>:<p>Shuttles and badminton gear, all in one place. The shop is coming soon.</p>}</div>}
       </section>
 
