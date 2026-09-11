@@ -3,7 +3,7 @@ import { defaultFilters, filterSessions } from './discoverFilters.js';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
 import React, { useState, useReducer, useMemo } from "react";
 import {
-  Search, MapPin, Calendar, Clock, Users, Trophy, User, Home,
+  Search, MapPin, Calendar, Clock, Users, Trophy, User, Home, ShoppingBag, Contact, GraduationCap, Layers,
   Filter, X, Check, Star, TrendingUp, Heart,
   Award, Settings, ArrowLeft, Plus, Minus, Shuffle, CreditCard,
   Building2, Bell, Wallet, ShieldCheck, ChevronRight, LogOut, Trash2, ClipboardList, ChevronDown
@@ -604,7 +604,8 @@ function SessionCard({ session, onOpen, favorites, toggleFav }) {
 /* ---------------------------------------------------------------
    DISCOVER PAGE
 ---------------------------------------------------------------- */
-function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
+function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal, go }) {
+  const [featureInfo, setFeatureInfo] = useState(null);
   const [filters, setFilters] = useState({...defaultFilters});
   const [position, setPosition] = useState(null);
   const [locating, setLocating] = useState(false);
@@ -628,13 +629,29 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-stone-900 via-stone-900/75 to-stone-900/20" />
         <div className="relative z-10 flex min-h-44 max-w-lg flex-col justify-center px-4 py-6 sm:min-h-48 sm:px-8">
           <h1 className="jimmi-hero-title">Find your people.<br/><span>Play your game.</span></h1>
-          <p className="jimmi-hero-description">Sessions, clubs, coaches &amp; gear. Your badminton, all in one place.</p>
+          <p className="jimmi-hero-description">Your badminton. Your community. All in one place.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="accent" onClick={() => document.getElementById("session-list")?.scrollIntoView({ behavior: "smooth" })}>
               <Search className="h-4 w-4" /> Find a session
             </Button>
           </div>
         </div>
+      </section>
+
+      <section className="jimmi-features" aria-label="Explore JimmiPlay features">
+        <div className="jimmi-feature-strip">
+          {[
+            {name:'Sessions',detail:'Find your next game',icon:Calendar,action:()=>document.getElementById('session-list')?.scrollIntoView({behavior:'smooth'})},
+            {name:'Sports Passport',detail:'Your player journey',icon:Contact,action:()=>go('profile')},
+            {name:'Levels',detail:'Find your level',icon:Layers,action:()=>setFeatureInfo(featureInfo==='levels'?null:'levels')},
+            {name:'Clubs',detail:'Find your community',icon:Users,action:()=>go('clubs')},
+            {name:'Rankings',detail:'Track your progress',icon:TrendingUp,action:()=>go('rankings')},
+            {name:'Coaching',detail:'Learn and improve',icon:GraduationCap,action:()=>{setFilters(f=>({...f,type:'Coaching'}));document.getElementById('session-list')?.scrollIntoView({behavior:'smooth'});}},
+            {name:'Shop',detail:'Shuttles & gear',icon:ShoppingBag,action:()=>setFeatureInfo(featureInfo==='shop'?null:'shop')},
+            {name:'Tournaments',detail:'Rise to the challenge',icon:Trophy,action:()=>go('tournaments')},
+          ].map(({name,detail,icon:Icon,action})=><button className="jimmi-feature" key={name} onClick={action}><span className="jimmi-feature-icon"><Icon size={25} strokeWidth={1.7}/></span><strong>{name}</strong><span className="jimmi-feature-detail">{detail}</span>{name==='Shop'&&<span className="jimmi-feature-soon">Coming soon</span>}</button>)}
+        </div>
+        {featureInfo&&<div className="jimmi-feature-info"><div className="flex items-center justify-between gap-3"><h2 className="font-semibold">{featureInfo==='levels'?'Find your level':'JimmiPlay Shop'}</h2><button aria-label="Close feature details" onClick={()=>setFeatureInfo(null)}><X size={18}/></button></div>{featureInfo==='levels'?<div className="jimmi-level-grid">{LEVELS.map(l=><div key={l.n}><strong>L{l.n} · {l.name}</strong><p>{l.detail}</p></div>)}</div>:<p>Shuttles and badminton gear, all in one place. The shop is coming soon.</p>}</div>}
       </section>
 
       <section id="session-list" className="discover-list">
@@ -1383,7 +1400,7 @@ export default function FlashX() {
       <TopNav view={view} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
       <MobileHeader title={titles[view] || "JimmiPlay"} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
 
-      {view === "discover" && <DiscoverPage openEvent={(id) => go("eventDetail", { eventId: id })} favorites={favorites} toggleFav={toggleFav} openAccountModal={openAccountModal} />}
+      {view === "discover" && <DiscoverPage go={go} openEvent={(id) => go("eventDetail", { eventId: id })} favorites={favorites} toggleFav={toggleFav} openAccountModal={openAccountModal} />}
       {view === "eventDetail" && <EventDetailPage eventId={params.eventId} go={go} bookings={bookings} followedClubs={followedClubs} toggleFollow={toggleFollow} />}
       {view === "payment" && <PaymentPage eventId={params.eventId} go={go} book={book} />}
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
