@@ -627,7 +627,8 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
         </div>
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-stone-900 via-stone-900/75 to-stone-900/20" />
         <div className="relative z-10 flex min-h-44 max-w-lg flex-col justify-center px-4 py-6 sm:min-h-48 sm:px-8">
-          <p className="mt-2 text-sm text-stone-300">Helps badminton players find each other — book a session by level and location, follow your club, track your ranking, find a coach and buy shuttles and more, all in one place.</p>
+          <h1 className="jimmi-hero-title">Find your people.<br/><span>Play your game.</span></h1>
+          <p className="jimmi-hero-description">Sessions, clubs, coaches &amp; gear. Your badminton, all in one place.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="accent" onClick={() => document.getElementById("session-list")?.scrollIntoView({ behavior: "smooth" })}>
               <Search className="h-4 w-4" /> Find a session
@@ -637,7 +638,7 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
       </section>
 
       <section id="session-list" className="discover-list">
-        <h1 className="sr-only">Find badminton sessions</h1>
+        <h2 className="sr-only">Find badminton sessions</h2>
         <DiscoverFilters filters={filters} setFilters={setFilters} locate={locate} locating={locating} locationMessage={locationMessage} hasLocation={Boolean(position)} types={types}/>
         <div id="results" className="mt-6 space-y-3">
           {filtered.length === 0 ? (

@@ -62,3 +62,8 @@
 .city-source { font-size: 10px; color: #78716c; padding: 8px 4px; }
 .city-source a { text-decoration: underline; }
 .discover-filterbar button { min-width: 0; overflow-wrap: anywhere; }
+
+@font-face { font-family: 'Jimmi Fredoka'; src: url('/fonts/fredoka-semibold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+.jimmi-hero-title { font-family: 'Jimmi Fredoka', 'Arial Rounded MT Bold', sans-serif; font-weight: 600; font-size: clamp(32px, 5vw, 46px); line-height: 1.08; letter-spacing: -.025em; color: #fafaf9; }
+.jimmi-hero-title span { color: #facc15; }
+.jimmi-hero-description { margin-top: 12px; max-width: 360px; font-size: 14px; line-height: 1.5; color: #d6d3d1; }
