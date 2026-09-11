@@ -500,12 +500,14 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
     </div>
   );
 }
+function BrandLogo() {
+  return <span className="brand-logo"><img src="/branding/jimmiplay-logo-dark.jpg" alt="JimmiPlay" width="1280" height="640" fetchPriority="high" /></span>;
+}
 function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
   return (
     <header className="hidden md:flex sticky top-0 z-20 items-center justify-between border-b border-stone-800 bg-stone-900 px-8 py-3">
-      <button onClick={() => go("discover")} className="flex items-center gap-2">
-        <div className="h-7 w-7 rounded-md bg-yellow-400 flex items-center justify-center"><span className="text-stone-900 font-bold text-sm">F</span></div>
-        <span className="font-semibold text-white tracking-tight">Jimmy</span>
+      <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
+        <BrandLogo />
       </button>
       <div className="flex items-center gap-1">
         <nav className="flex items-center gap-1">
@@ -525,9 +527,8 @@ function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen
 function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
   return (
     <header className="md:hidden sticky top-0 z-20 flex items-center justify-between border-b border-stone-800 bg-stone-900 px-4 py-3">
-      <button onClick={() => go("discover")} className="flex items-center gap-2">
-        <div className="h-6 w-6 rounded-md bg-yellow-400 flex items-center justify-center"><span className="text-stone-900 font-bold text-xs">F</span></div>
-        <span className="font-semibold text-white">Jimmy</span>
+      <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
+        <BrandLogo />
       </button>
       <p className="text-sm font-medium text-stone-300">{title}</p>
       <div className="flex items-center gap-1">
@@ -621,9 +622,9 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal }) {
         </div>
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-stone-900 via-stone-900/75 to-stone-900/20" />
         <div className="relative z-10 flex h-full max-w-lg flex-col justify-center px-4 sm:px-8">
-          <Badge tone="accent">Jimmy</Badge>
+          <Badge tone="accent">JimmiPlay</Badge>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">Book badminton sessions, courts and tournaments.</h1>
-          <p className="mt-2 text-sm text-stone-300">Jimmy is where London's badminton players find each other — book a session by level and location, follow your club, and track your ranking, all in one place.</p>
+          <p className="mt-2 text-sm text-stone-300">JimmiPlay is where London's badminton players find each other — book a session by level and location, follow your club, and track your ranking, all in one place.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="accent" onClick={() => document.getElementById("session-list")?.scrollIntoView({ behavior: "smooth" })}>
               <Search className="h-4 w-4" /> Find a session
@@ -1416,7 +1417,7 @@ export default function FlashX() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopNav view={view} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
-      <MobileHeader title={titles[view] || "Jimmy"} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
+      <MobileHeader title={titles[view] || "JimmiPlay"} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
 
       {view === "discover" && <DiscoverPage openEvent={(id) => go("eventDetail", { eventId: id })} favorites={favorites} toggleFav={toggleFav} openAccountModal={openAccountModal} />}
       {view === "eventDetail" && <EventDetailPage eventId={params.eventId} go={go} bookings={bookings} followedClubs={followedClubs} toggleFollow={toggleFollow} />}
