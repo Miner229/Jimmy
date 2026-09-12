@@ -307,14 +307,9 @@ function Tabs({ options, value, onChange }) {
 
 function AccountMenu({ open, setOpen, go, openAccountModal }) {
   const items = [
-    { label: "Coaching", action: () => go("coaching") },
-    { label: "Tournaments", action: () => go("tournaments") },
     { label: "View profile", action: () => go("profile") },
-    { label: "Organiser portal", action: () => go("organiser") },
     { label: "Settings", action: () => openAccountModal("settings") },
-    { label: "Payment methods", action: () => openAccountModal("methods") },
     { label: "Payment history", action: () => openAccountModal("history") },
-    { label: "Policies", action: () => openAccountModal("policies") },
   ];
   return (
     <div className="relative">
@@ -523,35 +518,31 @@ function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen
           ))}
         </nav>
         <button aria-label="Create" onClick={() => go("create")} className="art-plus desktop-plus">+</button>
+        <HeaderExtras go={go} setNotifOpen={setNotifOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal}/>
         <NotificationBell open={notifOpen} setOpen={setNotifOpen} />
         <AccountMenu open={accountOpen} setOpen={setAccountOpen} go={go} openAccountModal={openAccountModal} />
       </div>
     </header>
   );
 }
+function HeaderExtras({go,setNotifOpen,setAccountOpen,openAccountModal}) {
+  const [menu,setMenu]=useState(null);
+  const ref=React.useRef(null);
+  React.useEffect(()=>{const close=e=>{if(!ref.current?.contains(e.target))setMenu(null);};const escape=e=>{if(e.key==='Escape')setMenu(null);};document.addEventListener('pointerdown',close);document.addEventListener('keydown',escape);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',escape);};},[]);
+  const navigate=view=>{setMenu(null);go(view);};
+  return <div className="header-extras" ref={ref}>{['fun','boring'].map(kind=><div className="mobile-more" key={kind}><button className="mobile-more-trigger" aria-expanded={menu===kind} onClick={()=>{setMenu(menu===kind?null:kind);setNotifOpen(false);setAccountOpen(false);}}><span>{kind==='fun'?'More':'Boring'}<br/>{kind==='fun'?'Fun':'Stuff'}</span><ChevronDown size={12}/></button>{menu===kind&&<div className="mobile-more-menu">{kind==='fun'?<><div className="mobile-more-shop" aria-disabled="true"><ShoppingBag size={18}/><span>Shop<small>Coming soon</small></span></div><button onClick={()=>navigate('coaching')}><GraduationCap size={18}/>Coaching</button><button onClick={()=>navigate('levels')}><Layers size={18}/>Level</button><button onClick={()=>navigate('tournaments')}><Trophy size={18}/>Tournaments</button><button onClick={()=>navigate('organiser')}><ClipboardList size={18}/>Organiser Portal</button></>:<><button onClick={()=>{setMenu(null);openAccountModal('policies');}}>Policy</button><button onClick={()=>navigate('terms')}>Terms &amp; Conditions</button><button onClick={()=>navigate('contact')}>Contact us</button><button onClick={()=>navigate('about')}>About us</button></>}</div>}</div>)}</div>;
+}
+function InformationPage({view,go}) {
+ const titles={about:'About us',contact:'Contact us',terms:'Terms & Conditions'};
+ return <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl">{titles[view]}</h1><div className="information-copy">{view==='about'?<><h2>Three people. One shared court.</h2><p>JimmiPlay began with Benny, a middle-aged badminton enthusiast who loved the game but was tired of hunting for a group to play with. He teamed up with two younger friends — a co-founder and an IT builder — to make finding your badminton people a little easier. Two young minds, one seasoned player, and plenty of enthusiasm.</p><h2>A bridge between organisers and players</h2><p>Our mission is to help organisers build thriving communities and help players find sessions, clubs and coaches that suit their level and location. Less chasing group chats. More time on court.</p><h2>More than a game</h2><p>We want to make sport easier to join, bring generations and backgrounds together, and create more opportunities for friendship, movement and belonging. By helping local organisers reach players and players find their people, we hope to support healthier, more connected communities — one rally at a time.</p></>:view==='contact'?<><p>Questions, ideas or a little help finding your way? We would love to hear from players, coaches and organisers.</p><a className="underline" href="mailto:Hello@jimmiplay.com">Hello@jimmiplay.com</a></>:<><h2>Platform preview</h2><p>JimmiPlay is currently a demonstration platform. Listings, profiles and booking records may contain sample data. Booking, payment and registration screens do not confirm a real reservation, payment or coach approval.</p><h2>Before joining a session</h2><p>Check the organiser, venue, level requirements and any event-specific rules before making plans. Treat other players and organisers with respect and describe your playing level honestly.</p><h2>Full service terms</h2><p>Final service terms have not yet been published. They will be made available before live transactions are enabled.</p><p>For questions, contact <a className="underline" href="mailto:Hello@jimmiplay.com">Hello@jimmiplay.com</a>.</p></>}</div></main>;
+}
 function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = React.useRef(null);
-  React.useEffect(()=>{
-    const close=e=>{if(!moreRef.current?.contains(e.target))setMoreOpen(false);};
-    const escape=e=>{if(e.key==='Escape'){setMoreOpen(false);moreRef.current?.querySelector('button')?.focus();}};
-    document.addEventListener('pointerdown',close);document.addEventListener('keydown',escape);
-    return ()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',escape);};
-  },[]);
-  const moreGo=view=>{setMoreOpen(false);go(view);};
   return (
     <header className="md:hidden sticky top-0 z-20 flex items-center justify-between border-b border-stone-800 bg-stone-900 px-4 py-3">
       <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
         <BrandLogo />
       </button>
-      <div className="mobile-more" ref={moreRef}>
-        <button className="mobile-more-trigger" aria-expanded={moreOpen} aria-controls="mobile-more-menu" onClick={()=>{setMoreOpen(!moreOpen);setNotifOpen(false);setAccountOpen(false);}}>More <ChevronDown size={14}/></button>
-        {moreOpen&&<div className="mobile-more-menu" id="mobile-more-menu">
-          <div className="mobile-more-shop" aria-disabled="true"><ShoppingBag size={18}/><span>Shop<small>Coming soon</small></span></div>
-          <button onClick={()=>moreGo('coaching')}><GraduationCap size={18}/><span>Coaching<small>Coach verification</small></span></button>
-          <button onClick={()=>moreGo('levels')}><Layers size={18}/><span>Level<small>Explore levels 1–9</small></span></button>
-        </div>}
-      </div>
+      <HeaderExtras go={go} setNotifOpen={setNotifOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal}/>
       <div className="flex items-center gap-1">
         <NotificationBell open={notifOpen} setOpen={setNotifOpen} align="right" />
         <AccountMenu open={accountOpen} setOpen={setAccountOpen} go={go} openAccountModal={openAccountModal} />
@@ -1422,6 +1413,7 @@ export default function FlashX() {
       {view === "payment" && <PaymentPage eventId={params.eventId} go={go} book={book} />}
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
+      {["about","contact","terms"].includes(view) && <InformationPage view={view} go={go}/>}
       {view === "levels" && <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl font-semibold">Badminton levels</h1><p className="mt-2 text-sm text-stone-500">Find the level that best describes your game.</p><div className="mt-5 space-y-3">{LEVELS.map(l=><section key={l.n} className="rounded-xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-3"><Badge tone="accent">L{l.n}</Badge><h2 className="font-semibold">{l.name}</h2></div><p className="mt-2 text-sm text-stone-600">{l.detail}</p></section>)}</div></main>}
       {view === "rankings" && <RankingsPage />}
       {view === "clubs" && <ClubsPage openClub={(id) => go("clubDetail", { clubId: id })} followedClubs={followedClubs} />}
