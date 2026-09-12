@@ -530,12 +530,28 @@ function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen
   );
 }
 function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = React.useRef(null);
+  React.useEffect(()=>{
+    const close=e=>{if(!moreRef.current?.contains(e.target))setMoreOpen(false);};
+    const escape=e=>{if(e.key==='Escape'){setMoreOpen(false);moreRef.current?.querySelector('button')?.focus();}};
+    document.addEventListener('pointerdown',close);document.addEventListener('keydown',escape);
+    return ()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',escape);};
+  },[]);
+  const moreGo=view=>{setMoreOpen(false);go(view);};
   return (
     <header className="md:hidden sticky top-0 z-20 flex items-center justify-between border-b border-stone-800 bg-stone-900 px-4 py-3">
       <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
         <BrandLogo />
       </button>
-      <p className="text-sm font-medium text-stone-300">{title}</p>
+      <div className="mobile-more" ref={moreRef}>
+        <button className="mobile-more-trigger" aria-expanded={moreOpen} aria-controls="mobile-more-menu" onClick={()=>{setMoreOpen(!moreOpen);setNotifOpen(false);setAccountOpen(false);}}>More <ChevronDown size={14}/></button>
+        {moreOpen&&<div className="mobile-more-menu" id="mobile-more-menu">
+          <div className="mobile-more-shop" aria-disabled="true"><ShoppingBag size={18}/><span>Shop<small>Coming soon</small></span></div>
+          <button onClick={()=>moreGo('coaching')}><GraduationCap size={18}/><span>Coaching<small>Coach verification</small></span></button>
+          <button onClick={()=>moreGo('levels')}><Layers size={18}/><span>Level<small>Explore levels 1–9</small></span></button>
+        </div>}
+      </div>
       <div className="flex items-center gap-1">
         <NotificationBell open={notifOpen} setOpen={setNotifOpen} align="right" />
         <AccountMenu open={accountOpen} setOpen={setAccountOpen} go={go} openAccountModal={openAccountModal} />
@@ -1406,6 +1422,7 @@ export default function FlashX() {
       {view === "payment" && <PaymentPage eventId={params.eventId} go={go} book={book} />}
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
+      {view === "levels" && <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl font-semibold">Badminton levels</h1><p className="mt-2 text-sm text-stone-500">Find the level that best describes your game.</p><div className="mt-5 space-y-3">{LEVELS.map(l=><section key={l.n} className="rounded-xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-3"><Badge tone="accent">L{l.n}</Badge><h2 className="font-semibold">{l.name}</h2></div><p className="mt-2 text-sm text-stone-600">{l.detail}</p></section>)}</div></main>}
       {view === "rankings" && <RankingsPage />}
       {view === "clubs" && <ClubsPage openClub={(id) => go("clubDetail", { clubId: id })} followedClubs={followedClubs} />}
       {view === "clubDetail" && <ClubDetailPage clubId={params.clubId} go={go} followedClubs={followedClubs} toggleFollow={toggleFollow} />}

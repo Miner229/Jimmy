@@ -94,3 +94,11 @@
 .feature-loop-window:focus-within .feature-loop-track, .feature-loop-window:active .feature-loop-track { animation-play-state: paused; }
 @media(hover:hover) { .feature-loop-window:hover .feature-loop-track { animation-play-state: paused; } }
 @media(prefers-reduced-motion:reduce) { .feature-loop-track { animation: none; } .feature-loop-group[aria-hidden=true] { display: none; } .feature-loop-window { overflow-x: auto; } }
+
+.mobile-more { position: relative; }
+.mobile-more-trigger { display: flex; align-items: center; gap: 4px; padding: 8px 4px; color: #d6d3d1; font-size: 14px; }
+.mobile-more-menu { position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%); width: 195px; padding: 6px; background: #fff; border: 1px solid #e7e5e4; border-radius: 14px; box-shadow: 0 10px 30px #0003; }
+.mobile-more-menu > * { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; text-align: left; border-radius: 9px; font-size: 14px; color: #292524; }
+.mobile-more-menu button:hover, .mobile-more-menu button:focus-visible { background: #fef9c3; }
+.mobile-more-menu small { display: block; margin-top: 2px; font-size: 10px; color: #78716c; }
+.mobile-more-shop { opacity: .6; }
