@@ -1,3 +1,4 @@
+import MySpaceTools from './MySpaceTools.jsx';
 import TacticsBoard from './TacticsBoard.jsx';
 import AutoScrollFeatures from './AutoScrollFeatures.jsx';
 import DiscoverFilters from './DiscoverFilters.jsx';
@@ -308,7 +309,7 @@ function Tabs({ options, value, onChange }) {
 
 function AccountMenu({ open, setOpen, go, openAccountModal }) {
   const items = [
-    { label: "View profile", action: () => go("profile") },
+    { label: "My Space", action: () => go("profile") },
     { label: "Settings", action: () => openAccountModal("settings") },
     { label: "Payment history", action: () => openAccountModal("history") },
   ];
@@ -862,6 +863,7 @@ function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
   const level = LEVELS.find((l) => l.n === u.level);
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-8">
+      <h1 className="text-2xl mb-3">My Space</h1>
       <Badge tone="accent">Sports passport</Badge>
       <div className="mt-3 flex items-center gap-4">
         <button onClick={() => openAccountModal("settings")}><Avatar initials={u.initials} size={16} tone="white" /></button>
@@ -882,14 +884,7 @@ function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Performance">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile value={u.stats.wins} label="Wins" tone="yellow" />
-          <StatTile value={u.stats.losses} label="Losses" tone="muted" />
-          <StatTile value={`${u.stats.winRate}%`} label="Win rate" />
-          <StatTile value={`#${u.stats.ranking}`} label="Ranking" />
-        </div>
-      </SectionCard>
+      <MySpaceTools bookings={bookings} sessions={SESSIONS} stats={u.stats} openAccountModal={openAccountModal} go={go}/>
 
       <SectionCard title="Achievements">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -932,10 +927,7 @@ function ProfilePage({ bookings, go, followedClubs, openAccountModal }) {
         )}
       </SectionCard>
 
-      <button onClick={() => openAccountModal("methods")} className="mt-6 flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white p-4 text-left hover:border-stone-300">
-        <div className="flex items-center gap-3"><CreditCard className="h-5 w-5 text-stone-400" /><div><p className="text-sm font-medium text-stone-900">Payment & account settings</p><p className="text-xs text-stone-500">Payment methods, history, and policies</p></div></div>
-        <ChevronRight className="h-4 w-4 text-stone-300" />
-      </button>
+
     </div>
   );
 }
@@ -1368,7 +1360,7 @@ export default function FlashX() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "Profile", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
+  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "My Space", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
