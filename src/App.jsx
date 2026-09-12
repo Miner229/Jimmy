@@ -50,8 +50,8 @@ const LEVELS = [
   { n: 5, name: "Upper intermediate", detail: "Confident doubles player with pace control and net awareness. Can use the main strokes and basic tactics in games: smashes, drops, lifts, smash defence and net shots. Shot quality, accuracy and consistency still vary under pressure." },
   { n: 6, name: "Advanced", detail: "Strong movement, attack/defence patterns and competitive consistency. Has a broad technical repertoire, fluent footwork and varied tactical options. Can switch between attack and defence effectively, but power, speed and consistency can fall short against stronger opponents." },
   { n: 7, name: "Club advanced", detail: "Regular club or league player with high-tempo match experience. Sustains fast, demanding rallies and applies tactics consistently in club and league matches. Further progress depends on physical conditioning, technical reliability under pressure and experience against stronger competition." },
-  { n: 8, name: "Elite amateur", detail: "Tournament-level amateur with refined shot quality and speed. Shows the benefits of sustained, structured training, with polished technique and confident tactical execution. The next steps are experience in higher-level tournaments, greater consistency against top opponents and a more decisive finishing weapon. This level describes elite amateur ability, not professional status." },
-  { n: 9, name: "Performance", detail: "County, university first-team or semi-professional standard. Combines highly developed technique and tactics with a distinctive playing style and the ability to produce decisive shots in demanding matches. Performs at a high competitive standard; national or provincial professional status is not required by this platform level." },
+  { n: 8, name: "Professional", detail: "Has undergone long-term professional training and has a thorough command of badminton technique and tactics. This level marks the transition from amateur to professional play. Compared with higher-level players, the main areas to develop are experience in top-tier competition and a decisive signature shot or finishing weapon." },
+  { n: 9, name: "Elite", detail: "Plays at the standard of a national or provincial professional athlete. Technique and tactical understanding are at the highest level, with a distinctive personal playing style and frequent outstanding performances in competition." },
 ];
 
 // Illustrative venue coordinates: https://mapcarta.com/W1364508412
@@ -1413,7 +1413,7 @@ export default function FlashX() {
   const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "Profile", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+    <div className="min-h-screen bg-stone-50 text-stone-900">
       <TopNav view={view} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
       <MobileHeader title={titles[view] || "JimmiPlay"} go={go} notifOpen={notifOpen} setNotifOpen={setNotifOpen} accountOpen={accountOpen} setAccountOpen={setAccountOpen} openAccountModal={openAccountModal} />
 

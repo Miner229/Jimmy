@@ -63,8 +63,7 @@
 .city-source a { text-decoration: underline; }
 .discover-filterbar button { min-width: 0; overflow-wrap: anywhere; }
 
-@font-face { font-family: 'Jimmi Fredoka'; src: url('/fonts/fredoka-semibold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
-.jimmi-hero-title { font-family: 'Jimmi Fredoka', 'Arial Rounded MT Bold', sans-serif; font-weight: 600; font-size: clamp(32px, 5vw, 46px); line-height: 1.08; letter-spacing: -.025em; color: #fafaf9; }
+.jimmi-hero-title { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: clamp(32px, 5vw, 46px); line-height: 1.08; letter-spacing: -.025em; color: #fafaf9; }
 .jimmi-hero-title span { color: #facc15; }
 .jimmi-hero-description { margin-top: 12px; max-width: 360px; font-size: 14px; line-height: 1.5; color: #d6d3d1; }
 
@@ -102,3 +101,6 @@
 .mobile-more-menu button:hover, .mobile-more-menu button:focus-visible { background: #fef9c3; }
 .mobile-more-menu small { display: block; margin-top: 2px; font-size: 10px; color: #78716c; }
 .mobile-more-shop { opacity: .6; }
+
+@font-face { font-family: 'Bebas Neue'; src: url('/fonts/bebas-neue-regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+html, body, #root, #root *, dialog, dialog * { font-family: 'Bebas Neue', sans-serif !important; font-weight: 400 !important; font-synthesis: none; }
