@@ -43,15 +43,15 @@ function Photo({ id, alt, className = "", overlay = true, children }) {
    pricing, club-hosted sessions, sports-passport profile stats.
 ---------------------------------------------------------------- */
 const LEVELS = [
-  { n: 1, name: "Beginner", detail: "New player learning basic grip, serve and rally rhythm." },
-  { n: 2, name: "Improver", detail: "Can rally short exchanges and understands simple court positioning." },
-  { n: 3, name: "Lower intermediate", detail: "Comfortable in social doubles with developing consistency." },
-  { n: 4, name: "Intermediate", detail: "Stable rallies, basic tactics and reliable serve/return." },
-  { n: 5, name: "Upper intermediate", detail: "Confident doubles player with pace control and net awareness." },
-  { n: 6, name: "Advanced", detail: "Strong movement, attack/defence patterns and competitive consistency." },
-  { n: 7, name: "Club advanced", detail: "Regular club or league player with high-tempo match experience." },
-  { n: 8, name: "Elite amateur", detail: "Tournament-level amateur with refined shot quality and speed." },
-  { n: 9, name: "Performance", detail: "County, university first-team or semi-professional standard." },
+  { n: 1, name: "Beginner", detail: "New player learning basic grip, serve and rally rhythm. Learning the basic rules and scoring, a correct racket grip and the forehand serve. The focus is on making clean contact and starting a simple rally." },
+  { n: 2, name: "Improver", detail: "Can rally short exchanges and understands simple court positioning. Understands the basic rules of indoor badminton. Overhead clears, underarm lifts and net shots are still developing and cannot yet be placed reliably." },
+  { n: 3, name: "Lower intermediate", detail: "Comfortable in social doubles with developing consistency. Can direct basic clears and lifts with some control. Footwork and recovery remain inconsistent, and unforced errors are common when moving or under pressure." },
+  { n: 4, name: "Intermediate", detail: "Stable rallies, basic tactics and reliable serve/return. Has a working grasp of forward, backward and sideways footwork. Makes better choices when given time to attack, recovers more effectively and makes fewer unforced errors." },
+  { n: 5, name: "Upper intermediate", detail: "Confident doubles player with pace control and net awareness. Can use the main strokes and basic tactics in games: smashes, drops, lifts, smash defence and net shots. Shot quality, accuracy and consistency still vary under pressure." },
+  { n: 6, name: "Advanced", detail: "Strong movement, attack/defence patterns and competitive consistency. Has a broad technical repertoire, fluent footwork and varied tactical options. Can switch between attack and defence effectively, but power, speed and consistency can fall short against stronger opponents." },
+  { n: 7, name: "Club advanced", detail: "Regular club or league player with high-tempo match experience. Sustains fast, demanding rallies and applies tactics consistently in club and league matches. Further progress depends on physical conditioning, technical reliability under pressure and experience against stronger competition." },
+  { n: 8, name: "Elite amateur", detail: "Tournament-level amateur with refined shot quality and speed. Shows the benefits of sustained, structured training, with polished technique and confident tactical execution. The next steps are experience in higher-level tournaments, greater consistency against top opponents and a more decisive finishing weapon. This level describes elite amateur ability, not professional status." },
+  { n: 9, name: "Performance", detail: "County, university first-team or semi-professional standard. Combines highly developed technique and tactics with a distinctive playing style and the ability to produce decisive shots in demanding matches. Performs at a high competitive standard; national or provincial professional status is not required by this platform level." },
 ];
 
 // Illustrative venue coordinates: https://mapcarta.com/W1364508412
