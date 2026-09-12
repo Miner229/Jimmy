@@ -345,11 +345,10 @@ function AccountMenu({ open, setOpen, go, openAccountModal }) {
    profile page.
 ---------------------------------------------------------------- */
 function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMethod, removePaymentMethod, setDefaultMethod, flashToast }) {
-  const [tab, setTab] = useState(initialTab || "settings");
+  const tab = initialTab || "settings";
   const [form, setForm] = useState({ number: "", name: "", exp: "", cvc: "" });
   const [showAddCard, setShowAddCard] = useState(false);
 
-  React.useEffect(() => { if (open) setTab(initialTab || "settings"); }, [open, initialTab]);
   if (!open) return null;
 
   const submitCard = (e) => {
@@ -364,28 +363,14 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
     flashToast("Card saved");
   };
 
-  const TABS = [
-    { value: "settings", label: "Settings" },
-    { value: "methods", label: "Payment methods" },
-    { value: "history", label: "Payment history" },
-    { value: "policies", label: "Policies" },
-  ];
+  const title = {settings: 'Settings', methods: 'Payment methods', history: 'Payment history', policies: 'Policy'}[tab];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 p-4">
       <div className="mx-auto my-8 w-full max-w-2xl rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <Avatar initials={CURRENT_USER.initials} size={10} tone="white" />
-            <div><p className="font-semibold text-stone-900">{CURRENT_USER.name}</p><p className="text-xs text-stone-500">{CURRENT_USER.username || "@" + CURRENT_USER.name.toLowerCase()}</p></div>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700"><X className="h-5 w-5" /></button>
-        </div>
-
-        <div className="px-5 pt-4">
-          <div className="overflow-x-auto">
-            <Tabs options={TABS} value={tab} onChange={setTab} />
-          </div>
+          <h2 className="text-xl text-stone-900">{title}</h2>
+          <button onClick={onClose} aria-label="Close" className="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700"><X className="h-5 w-5" /></button>
         </div>
 
         <div className="max-h-96 overflow-y-auto px-5 py-5">
@@ -470,29 +455,10 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
 
           {tab === "policies" && (
             <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Why follow a club?</h3>
-                <ul className="mt-2 space-y-1.5">
-                  {CLUB_BENEFITS.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm text-stone-600"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-600" />{b}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Cancellations & refunds</h3>
+              <section>
+                <h3 className="text-sm font-semibold text-stone-900">Cancellations &amp; refunds</h3>
                 <p className="mt-2 text-sm leading-6 text-stone-600">Full refund if you cancel before the session's stated refund deadline. After that, seats can't be refunded but you can transfer to a friend from My bookings.</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-stone-900">Level bands</h3>
-                <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                  {LEVELS.map((l) => (
-                    <div key={l.n} className="rounded-lg border border-stone-200 p-2.5">
-                      <p className="text-xs font-medium text-stone-900">L{l.n} — {l.name}</p>
-                      <p className="text-xs text-stone-500">{l.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </section>
             </div>
           )}
         </div>
