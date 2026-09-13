@@ -1,3 +1,5 @@
+import Scoreboard from './Scoreboard.jsx';
+import TacticsBoard from './TacticsBoard.jsx';
 import ToolsPage from './ToolsPage.jsx';
 import MySpaceTools from './MySpaceTools.jsx';
 import AutoScrollFeatures from './AutoScrollFeatures.jsx';
@@ -467,9 +469,6 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
       </div>
     </div>
   );
-}
-function ToolLoginGate({name,onBack}) {
-  return <main className="mx-auto max-w-lg px-4 py-8"><BackRow label="Back to Tools" onBack={onBack}/><div className="rounded-2xl border border-stone-200 bg-white p-6 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-yellow-600"/><h1 className="mt-4 text-2xl">Sign in to use {name}</h1><p className="mt-3 text-stone-600">This tool is available to signed-in members only.</p><p className="mt-3 text-sm text-stone-500" role="status">Sign-in is not available yet. Please check back once member accounts are enabled.</p><button onClick={onBack} className="mt-6 rounded-xl bg-yellow-400 px-5 py-3">Back to Tools</button></div></main>;
 }
 function BrandLogo() {
   return <span className="brand-logo"><img src="/branding/jimmiplay-logo-dark.jpg" alt="JimmiPlay" width="1280" height="640" fetchPriority="high" /></span>;
@@ -1377,8 +1376,8 @@ export default function FlashX() {
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
       {["about","contact","terms"].includes(view) && <InformationPage view={view} go={go}/>}
       {view === "tools" && <ToolsPage go={go}/>}
-      {view === "scoreboard" && <ToolLoginGate name="Scoreboard" onBack={()=>go("tools")}/>}
-      {view === "tactics" && <ToolLoginGate name="Tactics Board" onBack={()=>go("tools")}/>}
+      {view === "scoreboard" && <Scoreboard onBack={()=>go("tools")}/>}
+      {view === "tactics" && <TacticsBoard onBack={()=>go("tools")}/>}
       {view === "levels" && <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl font-semibold">Badminton levels</h1><p className="mt-2 text-sm text-stone-500">Find the level that best describes your game.</p><div className="mt-5 space-y-3">{LEVELS.map(l=><section key={l.n} className="rounded-xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-3"><Badge tone="accent">L{l.n}</Badge><h2 className="font-semibold">{l.name}</h2></div><p className="mt-2 text-sm text-stone-600">{l.detail}</p></section>)}</div></main>}
       {view === "rankings" && <RankingsPage />}
       {view === "clubs" && <ClubsPage openClub={(id) => go("clubDetail", { clubId: id })} followedClubs={followedClubs} />}
