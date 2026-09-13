@@ -699,10 +699,10 @@ function EventDetailPage({ eventId, go, bookings, followedClubs, toggleFollow })
           <span className="text-xs text-stone-500">♂ {session.male} · ♀ {session.female}</span>
         </div>
         {!showRoster ? (
-          <button onClick={() => setShowRoster(true)} className="mt-2 flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {roster.slice(0, 8).map((p, i) => <Avatar key={i} initials={p.name.split(" ").map((w) => w[0]).join("")} />)}
-              {roster.length > 8 && <div className="h-10 w-10 rounded-full bg-stone-100 flex items-center justify-center text-xs font-medium text-stone-500">+{roster.length - 8}</div>}
+          <button onClick={() => setShowRoster(true)} className="mt-2 flex w-full flex-wrap items-center gap-3 text-left">
+            <div className="flex shrink-0 -space-x-2">
+              {roster.slice(0, 4).map((p, i) => <Avatar key={i} initials={p.name.split(" ").map((w) => w[0]).join("")} />)}
+              {roster.length > 4 && <div className="h-10 w-10 rounded-full bg-stone-100 flex items-center justify-center text-xs font-medium text-stone-500">+{roster.length - 4}</div>}
             </div>
             <span className="flex items-center gap-1 text-xs font-medium text-stone-500 hover:text-stone-900">Show everyone's level <ChevronDown className="h-3.5 w-3.5" /></span>
           </button>
@@ -751,7 +751,7 @@ function EventDetailPage({ eventId, go, bookings, followedClubs, toggleFollow })
         {session.tags.map((t) => <Badge key={t} tone="accent">{t}</Badge>)}
       </div>
 
-      <div className="sticky bottom-16 md:bottom-0 mt-8 flex items-center justify-between rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
+      <div className="sticky bottom-16 xl:bottom-0 mt-8 flex items-center justify-between rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
         <div>
           <p className="text-xs text-stone-500">{full ? "Session full — join waitlist" : `${left} seats still open`}</p>
           <p className="text-lg font-semibold text-stone-900">£{session.price}</p>
