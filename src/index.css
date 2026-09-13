@@ -112,3 +112,12 @@ html, body, #root, #root *, dialog, dialog * { font-family: 'Bebas Neue', sans-s
 .information-copy h2 { margin: 20px 0 8px; font-size: 21px; color: #292524; }
 .information-copy p { margin: 12px 0; }
 @media(max-width:400px) { .brand-logo { width: 108px; } .header-extras { gap: 4px; } .header-extras .mobile-more-trigger { padding-inline: 2px; font-size: 13px; } }
+
+/* Prevent wide grids and the looping icon track from widening the page. */
+html, body, #root { width: 100%; min-width: 0; }
+#root > div { min-width: 0; }
+.feature-autoscroll, .feature-loop-window, .jimmi-features { min-width: 0; max-width: 100%; }
+.feature-loop-window { contain: inline-size; }
+.header-extras { min-width: 0; }
+@media(max-width:1279px) { #root > div { padding-bottom: 68px; } }
+@media(max-width:360px) { header.xl\:hidden { padding-inline: 8px; } .brand-logo { width: 94px; } .header-extras { gap: 2px; } }

@@ -1,6 +1,4 @@
-import Scoreboard from './Scoreboard.jsx';
 import MySpaceTools from './MySpaceTools.jsx';
-import TacticsBoard from './TacticsBoard.jsx';
 import AutoScrollFeatures from './AutoScrollFeatures.jsx';
 import DiscoverFilters from './DiscoverFilters.jsx';
 import { defaultFilters, filterSessions } from './discoverFilters.js';
@@ -469,12 +467,15 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
     </div>
   );
 }
+function ToolLoginGate({name,onBack}) {
+  return <main className="mx-auto max-w-lg px-4 py-8"><BackRow label="Back to discover" onBack={onBack}/><div className="rounded-2xl border border-stone-200 bg-white p-6 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-yellow-600"/><h1 className="mt-4 text-2xl">Sign in to use {name}</h1><p className="mt-3 text-stone-600">This tool is available to signed-in members only.</p><p className="mt-3 text-sm text-stone-500" role="status">Sign-in is not available yet. Please check back once member accounts are enabled.</p><button onClick={onBack} className="mt-6 rounded-xl bg-yellow-400 px-5 py-3">Back to Discover</button></div></main>;
+}
 function BrandLogo() {
   return <span className="brand-logo"><img src="/branding/jimmiplay-logo-dark.jpg" alt="JimmiPlay" width="1280" height="640" fetchPriority="high" /></span>;
 }
 function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
   return (
-    <header className="hidden md:flex sticky top-0 z-20 items-center justify-between border-b border-stone-800 bg-stone-900 px-8 py-3">
+    <header className="hidden xl:flex sticky top-0 z-20 items-center justify-between border-b border-stone-800 bg-stone-900 px-8 py-3">
       <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
         <BrandLogo />
       </button>
@@ -507,7 +508,7 @@ function InformationPage({view,go}) {
 }
 function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen, openAccountModal }) {
   return (
-    <header className="md:hidden sticky top-0 z-20 flex items-center justify-between border-b border-stone-800 bg-stone-900 px-4 py-3">
+    <header className="xl:hidden sticky top-0 z-20 flex items-center justify-between border-b border-stone-800 bg-stone-900 px-4 py-3">
       <button onClick={() => go("discover")} className="brand-home" aria-label="JimmiPlay — Discover">
         <BrandLogo />
       </button>
@@ -521,7 +522,7 @@ function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAcco
 }
 function BottomNav({ view, go }) {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-20 grid grid-cols-5 border-t border-stone-800 bg-stone-900">
+    <nav className="xl:hidden fixed bottom-0 left-0 right-0 z-20 grid grid-cols-5 border-t border-stone-800 bg-stone-900">
       {MOBILE_NAV.map(key => key === "create" ? { key, label: "Create", icon: Plus } : NAV_ITEMS.find(i => i.key === key)).map((item) => {
         const Icon = item.icon;
         const active = view === item.key;
@@ -1374,8 +1375,8 @@ export default function FlashX() {
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
       {["about","contact","terms"].includes(view) && <InformationPage view={view} go={go}/>}
-      {view === "scoreboard" && <Scoreboard onBack={()=>go("discover")}/>}
-      {view === "tactics" && <TacticsBoard onBack={()=>go("discover")}/>}
+      {view === "scoreboard" && <ToolLoginGate name="Scoreboard" onBack={()=>go("discover")}/>}
+      {view === "tactics" && <ToolLoginGate name="Tactics Board" onBack={()=>go("discover")}/>}
       {view === "levels" && <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl font-semibold">Badminton levels</h1><p className="mt-2 text-sm text-stone-500">Find the level that best describes your game.</p><div className="mt-5 space-y-3">{LEVELS.map(l=><section key={l.n} className="rounded-xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-3"><Badge tone="accent">L{l.n}</Badge><h2 className="font-semibold">{l.name}</h2></div><p className="mt-2 text-sm text-stone-600">{l.detail}</p></section>)}</div></main>}
       {view === "rankings" && <RankingsPage />}
       {view === "clubs" && <ClubsPage openClub={(id) => go("clubDetail", { clubId: id })} followedClubs={followedClubs} />}
