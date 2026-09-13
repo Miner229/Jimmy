@@ -1,3 +1,4 @@
+import ToolsPage from './ToolsPage.jsx';
 import MySpaceTools from './MySpaceTools.jsx';
 import AutoScrollFeatures from './AutoScrollFeatures.jsx';
 import DiscoverFilters from './DiscoverFilters.jsx';
@@ -251,12 +252,12 @@ function BackRow({ label, onBack }) {
 const NAV_ITEMS = [
   { key: "discover", label: "Discover", icon: Home },
   { key: "clubs", label: "Clubs", icon: Building2 },
-  { key: "rankings", label: "Rankings", icon: TrendingUp },
+  { key: "tools", label: "Tools", icon: Shuffle },
   { key: "tournaments", label: "Tournaments", icon: Trophy },
   { key: "bookings", label: "Bookings", icon: Calendar },
   { key: "organiser", label: "Organiser", icon: ClipboardList },
 ];
-const MOBILE_NAV = ["discover", "clubs", "create", "rankings", "bookings"];
+const MOBILE_NAV = ["discover", "clubs", "create", "tools", "bookings"];
 
 const NOTIFICATIONS = [
   { id: "n1", title: "Waitlist spot opened", detail: "A seat freed up in Bromley Fast Rotation.", time: "12m ago" },
@@ -468,7 +469,7 @@ function AccountModal({ open, onClose, initialTab, paymentMethods, addPaymentMet
   );
 }
 function ToolLoginGate({name,onBack}) {
-  return <main className="mx-auto max-w-lg px-4 py-8"><BackRow label="Back to discover" onBack={onBack}/><div className="rounded-2xl border border-stone-200 bg-white p-6 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-yellow-600"/><h1 className="mt-4 text-2xl">Sign in to use {name}</h1><p className="mt-3 text-stone-600">This tool is available to signed-in members only.</p><p className="mt-3 text-sm text-stone-500" role="status">Sign-in is not available yet. Please check back once member accounts are enabled.</p><button onClick={onBack} className="mt-6 rounded-xl bg-yellow-400 px-5 py-3">Back to Discover</button></div></main>;
+  return <main className="mx-auto max-w-lg px-4 py-8"><BackRow label="Back to Tools" onBack={onBack}/><div className="rounded-2xl border border-stone-200 bg-white p-6 text-center"><ShieldCheck className="mx-auto h-10 w-10 text-yellow-600"/><h1 className="mt-4 text-2xl">Sign in to use {name}</h1><p className="mt-3 text-stone-600">This tool is available to signed-in members only.</p><p className="mt-3 text-sm text-stone-500" role="status">Sign-in is not available yet. Please check back once member accounts are enabled.</p><button onClick={onBack} className="mt-6 rounded-xl bg-yellow-400 px-5 py-3">Back to Tools</button></div></main>;
 }
 function BrandLogo() {
   return <span className="brand-logo"><img src="/branding/jimmiplay-logo-dark.jpg" alt="JimmiPlay" width="1280" height="640" fetchPriority="high" /></span>;
@@ -500,7 +501,7 @@ function HeaderExtras({go,setNotifOpen,setAccountOpen,openAccountModal}) {
   const ref=React.useRef(null);
   React.useEffect(()=>{const close=e=>{if(!ref.current?.contains(e.target))setMenu(null);};const escape=e=>{if(e.key==='Escape')setMenu(null);};document.addEventListener('pointerdown',close);document.addEventListener('keydown',escape);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',escape);};},[]);
   const navigate=view=>{setMenu(null);go(view);};
-  return <div className="header-extras" ref={ref}>{['fun','boring'].map(kind=><div className="mobile-more" key={kind}><button className="mobile-more-trigger" aria-expanded={menu===kind} onClick={()=>{setMenu(menu===kind?null:kind);setNotifOpen(false);setAccountOpen(false);}}><span>{kind==='fun'?'More':'Boring'}<br/>{kind==='fun'?'Fun':'Stuff'}</span><ChevronDown size={12}/></button>{menu===kind&&<div className="mobile-more-menu">{kind==='fun'?<><div className="mobile-more-shop" aria-disabled="true"><ShoppingBag size={18}/><span>Shop<small>Coming soon</small></span></div><button onClick={()=>navigate('coaching')}><GraduationCap size={18}/>Coaching</button><button onClick={()=>navigate('levels')}><Layers size={18}/>Level</button><button onClick={()=>navigate('tournaments')}><Trophy size={18}/>Tournaments</button><button onClick={()=>navigate('scoreboard')}><ClipboardList size={18}/>Scoreboard</button><button onClick={()=>navigate('tactics')}><Shuffle size={18}/>Tactics Board</button><button onClick={()=>navigate('organiser')}><ClipboardList size={18}/>Organiser Portal</button></>:<><button onClick={()=>{setMenu(null);openAccountModal('policies');}}>Policy</button><button onClick={()=>navigate('terms')}>Terms &amp; Conditions</button><button onClick={()=>navigate('contact')}>Contact us</button><button onClick={()=>navigate('about')}>About us</button></>}</div>}</div>)}</div>;
+  return <div className="header-extras" ref={ref}>{['fun','boring'].map(kind=><div className="mobile-more" key={kind}><button className="mobile-more-trigger" aria-expanded={menu===kind} onClick={()=>{setMenu(menu===kind?null:kind);setNotifOpen(false);setAccountOpen(false);}}><span>{kind==='fun'?'More':'Boring'}<br/>{kind==='fun'?'Fun':'Stuff'}</span><ChevronDown size={12}/></button>{menu===kind&&<div className="mobile-more-menu">{kind==='fun'?<><div className="mobile-more-shop" aria-disabled="true"><ShoppingBag size={18}/><span>Shop<small>Coming soon</small></span></div><button onClick={()=>navigate('coaching')}><GraduationCap size={18}/>Coaching</button><button onClick={()=>navigate('tournaments')}><Trophy size={18}/>Tournaments</button><button onClick={()=>navigate('organiser')}><ClipboardList size={18}/>Organiser Portal</button></>:<><button onClick={()=>{setMenu(null);openAccountModal('policies');}}>Policy</button><button onClick={()=>navigate('terms')}>Terms &amp; Conditions</button><button onClick={()=>navigate('contact')}>Contact us</button><button onClick={()=>navigate('about')}>About us</button></>}</div>}</div>)}</div>;
 }
 function InformationPage({view,go}) {
  const titles={about:'About us',contact:'Contact us',terms:'Terms & Conditions'};
@@ -623,7 +624,7 @@ function DiscoverPage({ openEvent, favorites, toggleFav, openAccountModal, go })
             {name:'Sports Passport',detail:'Your player journey',icon:Contact,action:()=>go('profile')},
             {name:'Levels',detail:'Find your level',icon:Layers,action:()=>setFeatureInfo(featureInfo==='levels'?null:'levels')},
             {name:'Clubs',detail:'Find your community',icon:Users,action:()=>go('clubs')},
-            {name:'Rankings',detail:'Track your progress',icon:TrendingUp,action:()=>go('rankings')},
+            {name:'Tools',detail:'Play smarter',icon:Shuffle,action:()=>go('tools')},
             {name:'Coaching',detail:'Learn and improve',icon:GraduationCap,action:()=>{setFilters(f=>({...f,type:'Coaching'}));document.getElementById('session-list')?.scrollIntoView({behavior:'smooth'});}},
             {name:'Shop',detail:'Shuttles & gear',icon:ShoppingBag,action:()=>setFeatureInfo(featureInfo==='shop'?null:'shop')},
             {name:'Tournaments',detail:'Rise to the challenge',icon:Trophy,action:()=>go('tournaments')},
@@ -1375,8 +1376,9 @@ export default function FlashX() {
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
       {["about","contact","terms"].includes(view) && <InformationPage view={view} go={go}/>}
-      {view === "scoreboard" && <ToolLoginGate name="Scoreboard" onBack={()=>go("discover")}/>}
-      {view === "tactics" && <ToolLoginGate name="Tactics Board" onBack={()=>go("discover")}/>}
+      {view === "tools" && <ToolsPage go={go}/>}
+      {view === "scoreboard" && <ToolLoginGate name="Scoreboard" onBack={()=>go("tools")}/>}
+      {view === "tactics" && <ToolLoginGate name="Tactics Board" onBack={()=>go("tools")}/>}
       {view === "levels" && <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8"><BackRow label="Back to discover" onBack={()=>go('discover')}/><h1 className="text-2xl font-semibold">Badminton levels</h1><p className="mt-2 text-sm text-stone-500">Find the level that best describes your game.</p><div className="mt-5 space-y-3">{LEVELS.map(l=><section key={l.n} className="rounded-xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-3"><Badge tone="accent">L{l.n}</Badge><h2 className="font-semibold">{l.name}</h2></div><p className="mt-2 text-sm text-stone-600">{l.detail}</p></section>)}</div></main>}
       {view === "rankings" && <RankingsPage />}
       {view === "clubs" && <ClubsPage openClub={(id) => go("clubDetail", { clubId: id })} followedClubs={followedClubs} />}
