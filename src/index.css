@@ -119,14 +119,26 @@ html, body, #root { width: 100%; min-width: 0; }
 .feature-autoscroll, .feature-loop-window, .jimmi-features { min-width: 0; max-width: 100%; }
 .feature-loop-window { contain: inline-size; }
 .header-extras { min-width: 0; }
-@media(max-width:1279px) { #root > div { padding-bottom: 68px; } }
+@media(max-width:1279px) { #root > div { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); } }
 @media(max-width:360px) { header.xl\:hidden { padding-inline: 8px; } .brand-logo { width: 94px; } .header-extras { gap: 2px; } }
 
 /* Keep document scrolling vertical, including transformed decorative layers. */
-html, body { max-width: 100%; overflow-x: clip; }
-#root { max-width: 100%; overflow-x: clip; }
+html, body { max-width: 100%; overflow-x: hidden; }
+#root { max-width: 100%; }
 #root > div > main, #root > div > div, #root > div > header { max-width: 100%; min-width: 0; }
 #root .grid > *, #root .flex > div { min-width: 0; }
 .header-extras .mobile-more-menu { max-width: calc(100vw - 24px); }
 @media(max-width:639px) { #root table { width: 100%; table-layout: fixed; } #root th, #root td { padding-inline: 5px; overflow-wrap: anywhere; } }
 @media(min-width:1280px) { header nav button { padding-inline: 8px !important; } }
+
+/* The navigation is portalled to body, outside page clipping/transform contexts. */
+.mobile-bottom-nav { position: fixed; inset: auto 0 0; width: 100%; max-width: 100%; z-index: 20; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); padding-bottom: env(safe-area-inset-bottom,0px); box-sizing: border-box; }
+.mobile-bottom-nav > button { min-width: 0; font-weight: 400; }
+@media(min-width:1280px) { .mobile-bottom-nav { display: none; } }
+@media(max-width:639px) {
+  .discover-dates { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)) 36px; gap: 0; padding-inline: 4px; overflow: hidden; }
+  .discover-dates button, .discover-calendar { min-width: 0; }
+  .discover-calendar input { min-width: 0; max-width: 100%; }
+  .location-status { flex-wrap: wrap; }
+}
+.feature-loop-window { isolation: isolate; clip-path: inset(0); }

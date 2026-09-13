@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import Scoreboard from './Scoreboard.jsx';
 import TacticsBoard from './TacticsBoard.jsx';
 import ToolsPage from './ToolsPage.jsx';
@@ -521,8 +522,8 @@ function MobileHeader({ title, go, notifOpen, setNotifOpen, accountOpen, setAcco
   );
 }
 function BottomNav({ view, go }) {
-  return (
-    <nav className="xl:hidden fixed bottom-0 left-0 right-0 z-20 grid grid-cols-5 border-t border-stone-800 bg-stone-900">
+  return createPortal(
+    <nav aria-label="Main navigation" className="mobile-bottom-nav xl:hidden border-t border-stone-800 bg-stone-900">
       {MOBILE_NAV.map(key => key === "create" ? { key, label: "Create", icon: Plus } : NAV_ITEMS.find(i => i.key === key)).map((item) => {
         const Icon = item.icon;
         const active = view === item.key;
@@ -534,7 +535,7 @@ function BottomNav({ view, go }) {
           </button>
         );
       })}
-    </nav>
+    </nav>, document.body
   );
 }
 
@@ -1408,7 +1409,7 @@ export default function FlashX() {
         </div>
       )}
 
-      <div className="h-16 md:hidden" />
+
       <BottomNav view={view} go={go} />
     </div>
   );
