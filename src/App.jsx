@@ -482,7 +482,7 @@ function TopNav({ view, go, notifOpen, setNotifOpen, accountOpen, setAccountOpen
       </button>
       <div className="flex items-center gap-1">
         <nav className="flex items-center gap-1">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter((item) => item.key !== "tournaments").map((item) => (
             <button key={item.key} onClick={() => go(item.key)} className={`rounded-lg px-3 py-2 text-sm font-medium transition ${view === item.key ? "bg-stone-800 text-yellow-400" : "text-stone-300 hover:text-white"}`}>
               {item.label}
             </button>
