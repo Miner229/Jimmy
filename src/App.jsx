@@ -5,6 +5,8 @@ import ToolsPage from './ToolsPage.jsx';
 import MySpaceTools from './MySpaceTools.jsx';
 import AutoScrollFeatures from './AutoScrollFeatures.jsx';
 import DiscoverFilters from './DiscoverFilters.jsx';
+import ComingSoon from './ComingSoon.jsx';
+import { pathToRoute, routeToPath } from './appRoutes.js';
 import { defaultFilters, filterSessions } from './discoverFilters.js';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
 import React, { useState, useReducer, useMemo } from "react";
@@ -789,7 +791,10 @@ function PaymentPage({ eventId, go, book }) {
   return (
     <div className="mx-auto max-w-md px-4 py-6 sm:px-8">
       <BackRow label="Back to session" onBack={() => go("eventDetail", { eventId: session.id })} />
-      <h1 className="text-xl font-semibold text-stone-900">Confirm and pay</h1>
+      <div className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-900">
+        Test environment — no real payment will be taken.
+      </div>
+      <h1 className="mt-5 text-xl font-semibold text-stone-900">Confirm test booking</h1>
       <Card className="mt-5 p-4">
         <p className="font-medium text-stone-900">{session.name}</p>
         <p className="text-sm text-stone-500">{session.date} · {session.timeStart}–{session.timeEnd} · {session.club}</p>
@@ -799,17 +804,9 @@ function PaymentPage({ eventId, go, book }) {
           <div className="flex justify-between font-semibold text-stone-900"><span>Total</span><span>£{total.toFixed(2)}</span></div>
         </div>
       </Card>
-      <div className="mt-5">
-        <h2 className="text-sm font-semibold text-stone-900">Payment method</h2>
-        <Card className="mt-2 flex items-center gap-3 p-4">
-          <CreditCard className="h-5 w-5 text-stone-400" />
-          <div className="flex-1"><p className="text-sm font-medium text-stone-900">Visa ending 4242</p><p className="text-xs text-stone-500">Processed securely via Stripe</p></div>
-          <Check className="h-4 w-4 text-yellow-600" />
-        </Card>
-      </div>
-      <p className="mt-4 text-xs text-stone-400">No real payment is taken in this preview. Full refund available before {session.refundBy}.</p>
+      <p className="mt-4 text-xs text-stone-500">This test records a preview booking only. No card details are requested and no money moves. The displayed price is for flow testing.</p>
       <Button variant="accent" className="mt-6 w-full" onClick={() => { book(session.id); setStep("confirmed"); }}>
-        {full ? "Join waitlist" : `Pay £${total.toFixed(2)}`}
+        {full ? "Join test waitlist" : "Confirm test booking"}
       </Button>
     </div>
   );
@@ -1309,10 +1306,11 @@ function OrganiserPage() {
 /* ---------------------------------------------------------------
    ROOT APP
 ---------------------------------------------------------------- */
-export default function FlashX() {
-  const [view, setView] = useState("discover");
+function JimmiPlayApp() {
+  const initialRoute = pathToRoute(window.location.pathname) || { view: "discover", params: {} };
+  const [view, setView] = useState(initialRoute.view);
   const [createOpen, setCreateOpen] = useState(false);
-  const [params, setParams] = useState({});
+  const [params, setParams] = useState(initialRoute.params);
   const [bookings, setBookings] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [followedClubs, setFollowedClubs] = useState([]);
@@ -1323,7 +1321,19 @@ export default function FlashX() {
   const [accountModal, setAccountModal] = useState({ open: false, tab: "settings" });
   const [toast, setToast] = useState(null);
 
-  const go = (v, p = {}) => { if(v === "create") { setCreateOpen(true); return; } setView(v); setParams(p); setNotifOpen(false); setAccountOpen(false); window.scrollTo(0, 0); };
+  const applyRoute = (route) => {
+    setView(route.view);
+    setParams(route.params);
+    setNotifOpen(false);
+    setAccountOpen(false);
+    window.scrollTo(0, 0);
+  };
+  const go = (v, p = {}) => {
+    if(v === "create") { setCreateOpen(true); return; }
+    const route = { view: v, params: p };
+    window.history.pushState(route, "", routeToPath(v, p));
+    applyRoute(route);
+  };
   const book = (id) => setBookings((b) => (b.some((x) => x.id === id) ? b : [...b, { id }]));
   const cancel = (id) => setBookings((b) => b.filter((x) => x.id !== id));
   const toggleFav = (id) => setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
@@ -1362,6 +1372,26 @@ export default function FlashX() {
     const timer = setTimeout(() => setToast(null), 2600);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  React.useEffect(() => {
+    const onPopState = () => {
+      const route = pathToRoute(window.location.pathname);
+      if (route) applyRoute(route);
+      else window.location.reload();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  React.useEffect(() => {
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement("meta");
+      robots.name = "robots";
+      document.head.appendChild(robots);
+    }
+    robots.content = "noindex, nofollow";
+  }, []);
 
   const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "My Space", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
 
@@ -1413,4 +1443,8 @@ export default function FlashX() {
       <BottomNav view={view} go={go} />
     </div>
   );
+}
+
+export default function FlashX() {
+  return pathToRoute(window.location.pathname) ? <JimmiPlayApp /> : <ComingSoon />;
 }

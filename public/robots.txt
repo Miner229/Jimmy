@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /dev53/
+
+Sitemap: https://www.jimmiplay.com/sitemap.xml
