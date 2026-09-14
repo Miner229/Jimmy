@@ -1391,6 +1391,7 @@ function JimmiPlayApp() {
       document.head.appendChild(robots);
     }
     robots.content = "noindex, nofollow";
+    document.title = "JimmiPlay — Development Preview";
   }, []);
 
   const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "My Space", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
