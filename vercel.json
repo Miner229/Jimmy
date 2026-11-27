@@ -1,6 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/api/payments/(.*)", "destination": "/api/payments?route=$1" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/payments/jobs/reconcile", "schedule": "17 3 * * *" }
   ]
 }
