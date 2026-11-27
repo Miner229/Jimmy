@@ -74,6 +74,9 @@ test('config blocks live Stripe keys unless explicitly allowed', () => {
   assert.equal(test.feeBps, 100);
   assert.throws(() => loadConfig({ ...env, STRIPE_SECRET_KEY: 'sk_test_abc', PLATFORM_FEE_BPS: 'x' }), ConfigError);
   assert.throws(() => loadConfig({ ...env, STRIPE_SECRET_KEY: undefined }), ConfigError);
+  const browserKeyOnly = loadConfig({ ...env, STRIPE_SECRET_KEY: 'sk_test_abc', SUPABASE_PUBLISHABLE_KEY: undefined, VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_v' });
+  assert.equal(browserKeyOnly.supabasePublishableKey, 'sb_publishable_v');
+  assert.equal(loadConfig({ ...env, STRIPE_SECRET_KEY: 'sk_test_abc' }).cronSecret, '', 'CRON_SECRET is optional');
 });
 
 // ---------------------------------------------------------------------------

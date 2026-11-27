@@ -49,7 +49,11 @@ export function loadConfig(env = process.env) {
     appOrigin,
     supabaseUrl: required(env, 'SUPABASE_URL').replace(/\/+$/, ''),
     supabaseSecretKey: required(env, 'SUPABASE_SECRET_KEY'),
-    supabasePublishableKey: required(env, 'SUPABASE_PUBLISHABLE_KEY'),
+    // The publishable key is public; the browser's copy is accepted so it is set only once.
+    supabasePublishableKey: required(
+      { SUPABASE_PUBLISHABLE_KEY: env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      'SUPABASE_PUBLISHABLE_KEY',
+    ),
     cronSecret: env.CRON_SECRET ? String(env.CRON_SECRET) : '',
   };
 }
