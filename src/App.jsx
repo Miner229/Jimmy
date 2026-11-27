@@ -9,6 +9,7 @@ import ComingSoon from './ComingSoon.jsx';
 import { pathToRoute, routeToPath } from './appRoutes.js';
 import { defaultFilters, filterSessions } from './discoverFilters.js';
 import { CreateSheet, EventForm, ClubForm, CoachingFlow } from './CreateFlows';
+import PaymentsPage from './payments/PaymentsPage.jsx';
 import React, { useState, useReducer, useMemo } from "react";
 import {
   Search, MapPin, Calendar, Clock, Users, Trophy, User, Home, ShoppingBag, Contact, GraduationCap, Layers,
@@ -317,6 +318,7 @@ function AccountMenu({ open, setOpen, go, openAccountModal }) {
     { label: "My Space", action: () => go("profile") },
     { label: "Settings", action: () => openAccountModal("settings") },
     { label: "Payment history", action: () => openAccountModal("history") },
+    { label: "Payments (test mode)", action: () => go("payments") },
   ];
   return (
     <div className="relative">
@@ -822,6 +824,9 @@ function BookingsPage({ bookings, cancel, go, openAccountModal }) {
         <h1 className="text-xl font-semibold text-stone-900">My bookings</h1>
         <button onClick={() => openAccountModal("history")} className="text-xs font-medium text-stone-500 hover:text-stone-900">Payment history →</button>
       </div>
+      <button onClick={() => go("payments", {})} className="mt-3 w-full rounded-lg border border-dashed border-stone-300 px-3 py-2 text-left text-xs text-stone-500 hover:border-stone-400 hover:text-stone-900">
+        Paid bookings with Stripe (test mode): book, cancel and see refunds →
+      </button>
 
       {bookings.length === 0 ? (
         <div className="mt-10 text-center">
@@ -1394,7 +1399,7 @@ function JimmiPlayApp() {
     document.title = "JimmiPlay — Development Preview";
   }, []);
 
-  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "My Space", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament" };
+  const titles = { discover: "Discover", clubs: "Clubs", rankings: "Rankings", tournaments: "Tournaments", bookings: "My bookings", profile: "My Space", organiser: "Organiser portal", eventDetail: "Session", payment: "Payment", clubDetail: "Club", tournamentDetail: "Tournament", payments: "Payments" };
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
@@ -1405,6 +1410,7 @@ function JimmiPlayApp() {
       {view === "eventDetail" && <EventDetailPage eventId={params.eventId} go={go} bookings={bookings} followedClubs={followedClubs} toggleFollow={toggleFollow} />}
       {view === "payment" && <PaymentPage eventId={params.eventId} go={go} book={book} />}
       {view === "bookings" && <BookingsPage bookings={bookings} cancel={cancel} go={go} openAccountModal={openAccountModal} />}
+      {view === "payments" && <PaymentsPage />}
       {view === "profile" && <ProfilePage bookings={bookings} go={go} followedClubs={followedClubs} openAccountModal={openAccountModal} />}
       {["about","contact","terms"].includes(view) && <InformationPage view={view} go={go}/>}
       {view === "tools" && <ToolsPage go={go}/>}
