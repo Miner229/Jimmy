@@ -19,6 +19,7 @@ const staticRoutes = {
   "create-tournament": "create/tournament",
   "create-club": "create/club",
   coaching: "coaching",
+  payments: "payments",
 };
 
 export function routeToPath(view, params = {}) {
